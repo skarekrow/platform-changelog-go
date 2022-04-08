@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 
-	"github.com/redhatinsights/platform-changelog-go/internal/common/config"
+	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 
 	"gorm.io/driver/postgres"
@@ -12,7 +12,7 @@ import (
 
 var DB *gorm.DB
 
-func DbConnect(cfg *config.Confifg) {
+func DbConnect(cfg *config.Config) {
 	var (
 		user = cfg.DatabaseConfig.DBUser
 		password = cfg.DatabaseConfig.DBPassword

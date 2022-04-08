@@ -9,7 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/redhatinsights/platform-changelog-go/internal/common/config"
+	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	lc "github.com/redhatinsights/platform-go-middlewares/logging/cloudwatch"
 	"github.com/sirupsen/logrus"
 )
@@ -29,7 +29,7 @@ var Log *logrus.Logger
 var logLevel logrus.Level
 
 // NewCloudwatchFormatter creates a new logrus formatter for cloudwatch
-func NewCloudwatchFormatter(cfg *config.TrackerConfig) *CustomCloudwatch {
+func NewCloudwatchFormatter(cfg *config.Config) *CustomCloudwatch {
 	f := &CustomCloudwatch{
 		Hostname: cfg.Hostname,
 	}
