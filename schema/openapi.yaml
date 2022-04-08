@@ -1,0 +1,43 @@
+---
+openapi: 3.0.3
+info:
+  title: Platform Changlog
+  description: Platform Changelog is a searchable database of all platform changes
+  version: 0.1.0
+  contact:
+    email: sadams@redhat.com
+
+paths:
+  /api/platform-changelog/v1/status:
+    get:
+      description: get the status of the service
+      operationId: get.status
+      responses:
+       '200':
+          description: OK
+          content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/Status'
+
+  /api/platform-changelog/v1/github-webhook:
+    post:
+      description: receive a webhook from github
+      responses:
+       '200':
+          description: OK
+          content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/GithubWebhook'
+
+components:
+  schemas:
+   /api/platform-changelog/v1/status:
+     type: object
+     properties:
+      status:
+        type: string
+        description: The status of the service
+        example: OK
+      
