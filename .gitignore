@@ -17,3 +17,6 @@
 # Go workspace file
 go.work
 
+# built executables
+platform-changelog-api
+main
