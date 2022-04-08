@@ -16,6 +16,7 @@ type Config struct {
 	Hostname string
 	CloudwatchConfig CloudwatchCfg
 	DatabaseConfig DatabaseCfg
+	GithubWebhookSecretKey string
 }
 
 type DatabaseCfg struct {
@@ -45,6 +46,7 @@ func Get() *Config {
 	// global logging
 	options.SetDefault("logLevel", "INFO")
 	options.SetDefault("Hostname", hostname)
+	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 
 	if clowder.IsClowderEnabled() {
 		cfg := clowder.LoadedConfig
@@ -89,6 +91,7 @@ func Get() *Config {
 	config := &Config{
 		Hostname: options.GetString("Hostname"),
 		LogLevel: options.GetString("logLevel"),
+		GithubWebhookSecretKey: options.GetString("GithubSecretKey"),
 		PublicPort: options.GetString("publicPort"),
 		MetricsPort: options.GetString("metricsPort"),
 		MetricsPath: options.GetString("metricsPath"),
