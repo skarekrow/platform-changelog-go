@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"io/ioutil"
 	"net/http"
 
 	"github.com/google/go-github/github"
@@ -13,9 +14,16 @@ import (
 // GithubWebhook gets data from the webhook and enters it into the DB
 func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 
+	var err error
+	var payload []byte 
+
 	services := config.Get().Services
 
-	payload, err := github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
+	if config.Get().Debug {
+		payload, err = ioutil.ReadAll(r.Body)
+	} else {
+		payload, err = github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
+	}
 	if err != nil {
 		l.Log.Error(err)
 		return

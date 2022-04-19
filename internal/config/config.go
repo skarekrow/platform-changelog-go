@@ -24,6 +24,7 @@ type Config struct {
 	DatabaseConfig         DatabaseCfg
 	GithubWebhookSecretKey string
 	Services               map[string]Service
+	Debug				   bool
 }
 
 type DatabaseCfg struct {
@@ -63,6 +64,7 @@ func Get() *Config {
 	options.SetDefault("logLevel", "INFO")
 	options.SetDefault("Hostname", hostname)
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
+	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
 
 	if clowder.IsClowderEnabled() {
 		cfg := clowder.LoadedConfig
