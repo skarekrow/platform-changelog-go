@@ -13,5 +13,17 @@ test:
 
 run-migration:
 
-	go build -o platform-changelog-migration cmd/migration/main.go
+	go build -o platform-changelog-migration internal/migration/main.go
 	./platform-changelog-migration
+
+compose:
+
+	podman-compose -f development/compose.yml up
+
+compose-quiet:
+
+	podman-compose -f development/compose.yml up -d
+
+compose-down:
+
+	podman-compose -f development/compose.yml down

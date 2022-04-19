@@ -8,6 +8,7 @@ import (
 
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
+	"github.com/redhatinsights/platform-changelog-go/internal/endpoints"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
 )
 
@@ -36,6 +37,10 @@ func main() {
 
 	mr.Get("/", lubdub)
 	mr.Handle("/metrics", promhttp.Handler())
+	sub.Post("/github-webhook", endpoints.GithubWebhook)
+	sub.Get("/services", endpoints.GetServicesAll)
+	sub.Get("/commits", endpoints.GetCommitsAll)
+	sub.Get("/deploys", endpoints.GetDeploysAll)
 
 	srv := http.Server{
 		Addr: ":" + cfg.PublicPort,

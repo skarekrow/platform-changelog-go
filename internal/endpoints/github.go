@@ -5,11 +5,16 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
+	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
+	m "github.com/redhatinsights/platform-changelog-go/internal/models"
 )
 
+// GithubWebhook gets data from the webhook and enters it into the DB
 func GithubWebhook(w http.ResponseWriter, r *http.Request) {
-	
+
+	services := config.Get().Services
+
 	payload, err := github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
 	if err != nil {
 		l.Log.Error(err)
@@ -27,16 +32,34 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 	case *github.PingEvent:
 		writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
 		return
-	case *github.PullRequest:
+	case *github.PullRequestEvent:
 		// not remotely complete. This just a placeholder.
-		if e.GetMerged() {
+		if *e.PullRequest.Merged {
+			commit := getCommitData(e, services)
+			result := db.CreateCommitEntry(db.DB, commit)
+			db.DB.Commit()
+			l.Log.Info("Created commit entry:", result.Statement)
 			writeResponse(w, http.StatusOK, `{"msg": "merged"}`)
 			return
 		}
-		writeResponse(w, http.StatusOK, `{"msg": "not merged yet"}`)
+		writeResponse(w, http.StatusOK, `{"msg": "PR not merged yet"}`)
 		return
 	default:
 		writeResponse(w, http.StatusOK, `{"msg": "Event from this repo is not a push event"}`)
-		return	
+		return
 	}
+}
+
+func getCommitData(g *github.PullRequestEvent, s map[string]config.Service) m.Commits {
+	commit := &m.Commits{
+		Repo:      *g.Repo.Name,
+		Ref:       *g.PullRequest.Head.Ref,
+		Title:     *g.PullRequest.Title,
+		Timestamp: *g.PullRequest.MergedAt,
+		Author:    *g.PullRequest.GetUser().Login,
+		MergedBy:  *g.PullRequest.MergedBy.Login,
+		Message:   *g.PullRequest.Body,
+	}
+
+	return *commit
 }

@@ -4,35 +4,51 @@ import (
 	"os"
 	"strings"
 
+	_ "embed"
+
 	clowder "github.com/redhatinsights/app-common-go/pkg/api/v1"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
+//go:embed services.yaml
+var services []byte
+
 type Config struct {
-	PublicPort string
-	MetricsPort string
-	MetricsPath string
-	LogLevel string
-	Hostname string
-	CloudwatchConfig CloudwatchCfg
-	DatabaseConfig DatabaseCfg
+	PublicPort             string
+	MetricsPort            string
+	MetricsPath            string
+	LogLevel               string
+	Hostname               string
+	CloudwatchConfig       CloudwatchCfg
+	DatabaseConfig         DatabaseCfg
 	GithubWebhookSecretKey string
+	Services               map[string]Service
 }
 
 type DatabaseCfg struct {
-	DBUser string
+	DBUser     string
 	DBPassword string
-	DBName string
-	DBHost string
-	DBPort string
-	RDSCa string
+	DBName     string
+	DBHost     string
+	DBPort     string
+	RDSCa      string
 }
 
 type CloudwatchCfg struct {
-	CWLogGroup string
-	CWRegion string
+	CWLogGroup  string
+	CWRegion    string
 	CWAccessKey string
 	CWSecretKey string
+}
+
+type Service struct {
+	DisplayName string `yaml:"display_name"`
+	GHRepo      string `yaml:"gh_repo,omitempty"`
+	GLRepo		string `yaml:"gl_repo,omitempty"`
+	Branch      string `yaml:"branch"`
+	Namespace   string `yaml:"namespace,omitempty"`
+	DeployFile  string `yaml:"deploy_file,omitempty"`
 }
 
 func Get() *Config {
@@ -86,32 +102,32 @@ func Get() *Config {
 	}
 
 	options.AutomaticEnv()
-	options.SetEnvKeyReplacer(strings.NewReplacer(".","_"))
+	options.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	config := &Config{
-		Hostname: options.GetString("Hostname"),
-		LogLevel: options.GetString("logLevel"),
+		Hostname:               options.GetString("Hostname"),
+		LogLevel:               options.GetString("logLevel"),
 		GithubWebhookSecretKey: options.GetString("GithubSecretKey"),
-		PublicPort: options.GetString("publicPort"),
-		MetricsPort: options.GetString("metricsPort"),
-		MetricsPath: options.GetString("metricsPath"),
+		PublicPort:             options.GetString("publicPort"),
+		MetricsPort:            options.GetString("metricsPort"),
+		MetricsPath:            options.GetString("metricsPath"),
 		DatabaseConfig: DatabaseCfg{
-			DBUser: options.GetString("db.user"),
+			DBUser:     options.GetString("db.user"),
 			DBPassword: options.GetString("db.password"),
-			DBName: options.GetString("db.name"),
-			DBHost: options.GetString("db.host"),
-			DBPort: options.GetString("db.port"),
+			DBName:     options.GetString("db.name"),
+			DBHost:     options.GetString("db.host"),
+			DBPort:     options.GetString("db.port"),
 		},
 		CloudwatchConfig: CloudwatchCfg{
-			CWLogGroup: options.GetString("logGroup"),
-			CWRegion: options.GetString("cwRegion"),
+			CWLogGroup:  options.GetString("logGroup"),
+			CWRegion:    options.GetString("cwRegion"),
 			CWAccessKey: options.GetString("cwAccessKey"),
 			CWSecretKey: options.GetString("cwSecretKey"),
 		},
 	}
 
 	if clowder.IsClowderEnabled() {
-		
+
 		// write the RDS CA using the app-common-go package
 		if clowder.LoadedConfig.Database.RdsCa != nil {
 			rdsCAPath, err := clowder.LoadedConfig.RdsCa()
@@ -122,6 +138,12 @@ func Get() *Config {
 
 			config.DatabaseConfig.RDSCa = rdsCAPath
 		}
+	}
+
+	// read in services.yaml to the config
+	err = yaml.Unmarshal(services, config)
+	if err != nil {
+		panic("Unable to read services.yaml")
 	}
 
 	return config
