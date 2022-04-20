@@ -29,7 +29,7 @@ func main() {
 
 	r := chi.NewRouter()
 	mr := chi.NewRouter()
-	sub := chi.NewRouter()
+	sub := chi.NewRouter().With(endpoints.ResponseMetricsMiddleware)
 
 	// Mount the root of the api router on /api/v1
 	r.Mount("/api/v1", sub)

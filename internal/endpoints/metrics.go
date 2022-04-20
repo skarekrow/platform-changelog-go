@@ -13,27 +13,17 @@ var (
 	requests = pa.NewCounterVec(p.CounterOpts{
 		Name: "platform_changelog_requests_total",
 		Help: "Total number of requests",
-	}, []string{})
+	}, []string{"path", "method", "user_agent"})
 
-	ghWebhooks = pa.NewCounterVec(p.CounterOpts{
-		Name: "platform_changelog_github_webhooks_total",
-		Help: "Total number of github webhooks",
-	}, []string{})
+	webhooks = pa.NewCounterVec(p.CounterOpts{
+		Name: "platform_changelog_webhooks_total",
+		Help: "Total number of incoming webhooks",
+	}, []string{"source", "method", "user_agent"})
 
-	glWebhooks = pa.NewCounterVec(p.CounterOpts{
-		Name: "platform_changelog_gitlab_webhooks_total",
-		Help: "Total number of gitlab webhooks",
-	}, []string{})
-
-	ghWebhooksErrors = pa.NewCounterVec(p.CounterOpts{
-		Name: "platform_changelog_github_webhooks_errors_total",
-		Help: "Total number of github webhooks errors",
-	}, []string{})
-
-	glWebhooksErrors = pa.NewCounterVec(p.CounterOpts{
-		Name: "platform_changelog_gitlab_webhooks_errors_total",
-		Help: "Total number of gitlab webhooks errors",
-	}, []string{})
+	webhookErrors = pa.NewCounterVec(p.CounterOpts{
+		Name: "platform_changelog_webhooks_errors_total",
+		Help: "Total number of incoming webhook errors",
+	}, []string{"source", "method", "user_agent"})
 
 	responseCodes = pa.NewCounterVec(p.CounterOpts{
 		Name: "platform_changelog_response_codes_total",
@@ -51,12 +41,20 @@ type metricsTrackingResponseWriter struct {
 	UserAgent string
 }
 
-func incRequests() {
-	requests.With(p.Labels{}).Inc()
+func incRequests(path string, method string, userAgent string) {
+	requests.With(p.Labels{"path": path, "method": method, "user_agent": userAgent}).Inc()
 }
 
-func observeDBTime(elapsed time.Duration) {
-	dbElapsed.With(p.Labels{}).Observe(elapsed.Seconds())
+func incWebhooks(source string, method string, userAgent string, err bool) {
+	if !err {
+		webhooks.With(p.Labels{"source": source, "method": method, "user_agent": userAgent}).Inc()
+	} else {
+		webhookErrors.With(p.Labels{"source": source, "method": method, "user_agent": userAgent}).Inc()
+	}
+}
+
+func observeDBTime(operation string, elapsed time.Duration) {
+	dbElapsed.With(p.Labels{"operation": operation}).Observe(elapsed.Seconds())
 }
 
 func (m *metricsTrackingResponseWriter) Header() http.Header {

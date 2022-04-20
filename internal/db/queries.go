@@ -32,22 +32,22 @@ func CreateCommitEntry(db *gorm.DB, c []models.Commits) *gorm.DB {
 	return db
 }
 
-func GetServicesAll(db *gorm.DB) ([]models.Services) {
+func GetServicesAll(db *gorm.DB) (*gorm.DB, []models.Services) {
 	var services []models.Services
-	db.Find(&services)
-	return services
+	result := db.Find(&services)
+	return result, services
 }
 
-func GetCommitsAll(db *gorm.DB) ([]models.Commits) {
+func GetCommitsAll(db *gorm.DB) (*gorm.DB, []models.Commits) {
 	var commits []models.Commits
-	db.Find(&commits)
-	return commits
+	result := db.Find(&commits)
+	return result, commits
 }
 
-func GetDeploysAll(db *gorm.DB) ([]models.Deploys) {
+func GetDeploysAll(db *gorm.DB) (*gorm.DB, []models.Deploys) {
 	var deploys []models.Deploys
-	db.Find(&deploys)
-	return deploys
+	result := db.Find(&deploys)
+	return result, deploys
 }
 
 // GetAllByServiceName returns all commits for a given service
