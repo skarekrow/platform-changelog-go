@@ -36,6 +36,7 @@ func main() {
 	r.Get("/", lubdub)
 
 	mr.Get("/", lubdub)
+	mr.Get("/healthz", lubdub)
 	mr.Handle("/metrics", promhttp.Handler())
 	sub.Post("/github-webhook", endpoints.GithubWebhook)
 	sub.Get("/services", endpoints.GetServicesAll)
