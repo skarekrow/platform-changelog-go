@@ -1,0 +1,102 @@
+---
+apiVersion: v1
+kind: Template
+metadata:
+  name: platform-changelog-api
+objects:
+- apiVersion: cloud.redhat.com/v1alpha1
+  kind: ClowdApp
+  metadata:
+    name: platform-changelog-api
+  spec:
+    envName: ${ENV_NAME}
+    database:
+      name: platformchangelog
+    deployments:
+    - name: api
+      webServices:
+        public:
+          enabled: True
+      minReplicas: ${{API_REPLICAS}}
+      podSpec:
+        initContainers:
+          - command:
+            - ./platform-changelog-migration
+            image: ${IMAGE}:${IMAGE_TAG}
+            inheritEnv: True
+        minReadySeconds: 15
+        progressDeadlineSeconds: 600
+        image: ${IMAGE}:${IMAGE_TAG}
+        command:
+          - ./platform-changelog-api
+        livelinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 8000
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 8000
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: ${API_CPU_LIMIT}
+            memory: ${API_MEMORY_LIMIT}
+          requests:
+            cpu: ${API_CPU_REQUEST}
+            memory: ${API_MEMORY_REQUEST}
+        env:
+          - name: LOGLEVEL
+            value: ${LOGLEVEL}
+
+parameters:
+- description: Initial amount of memory the platform-changlog container will request.
+  displayName: Memory Request
+  name: API_MEMORY_REQUEST
+  required: true
+  value: 256Mi
+- description: Maximum amount of memory for the platform-changlog.
+  displayName: Memory Limit
+  name: API_MEMORY_LIMIT
+  required: true
+  value: 512Mi
+- description: Initial amount of cpu the platform-changlog will request.
+  displayName: CPU Request
+  name: API_CPU_REQUEST
+  required: true
+  value: 200m
+- description: Maximum amount of cpu the platform-changlog can use.
+  displayName: CPU Limit
+  name: API_CPU_LIMIT
+  required: true
+  value: 500m
+- description: The log level to use for logging
+  displayName: The log level to use for logging
+  name: LOGLEVEL
+  required: true
+  value: DEBUG
+- description: The number of replicas to use for the platform-changlog
+  name: API_REPLICAS
+  value: '1'
+- description: The number of replicas to use for the platform-changlog consumer
+  name: CONSUMER_REPLICAS
+  value: '3'
+- description: Image
+  name: IMAGE
+  required: true
+  value: quay.io/cloudservices/platform-changelog-api
+- description: Image tag
+  name: IMAGE_TAG
+  required: true
+- name: ENV_NAME
+  value: platform-changelog-api
+  required: true
