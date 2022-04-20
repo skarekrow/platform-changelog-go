@@ -6,14 +6,15 @@ import (
 
 type Services struct {
 	ID          int    `gorm:"primary_key"`
+	Name		string `gorm:"not null"`
 	DisplayName string `gorm:"not null;unique"`
 	GHRepo      string
 	GLRepo      string
 	DeployFile  string
 	Namespace   string
 	Branch      string `gorm:"default:'master'"`
-	Commits     Commits `gorm:"foreignkey:ID"`
-	Deploys     Deploys `gorm:"foreignkey:ID"`
+	Commits     []Commits `gorm:"foreignkey:ID"`
+	Deploys     []Deploys `gorm:"foreignkey:ID"`
 }
 
 type Commits struct {
@@ -21,7 +22,6 @@ type Commits struct {
 	ServiceID int       `gorm:"not null;foreign_key:services.id"`
 	Repo      string    `gorm:"not null"`
 	Ref       string    `gorm:"not null"`
-	Title     string    `gorm:"not null"`
 	Timestamp time.Time `gorm:"not null"`
 	Author    string    `gorm:"not null"`
 	MergedBy  string

@@ -9,3 +9,8 @@ services:
     gh_repo: https://github.com/RedHatInsights/entitlements-api-go
     branch: master
     namespace: entitlements-prod
+  ingress:
+   display_name: Ingress
+   gh_repo: https://github.com/RedHatInsights/insights-ingress-go
+   branch: master
+   namespace: ingress-prod

@@ -3,12 +3,14 @@ package endpoints
 import (
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/google/go-github/github"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	m "github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/utils"
 )
 
 // GithubWebhook gets data from the webhook and enters it into the DB
@@ -40,34 +42,47 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 	case *github.PingEvent:
 		writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
 		return
-	case *github.PullRequestEvent:
-		// not remotely complete. This just a placeholder.
-		if *e.PullRequest.Merged {
-			commit := getCommitData(e, services)
-			result := db.CreateCommitEntry(db.DB, commit)
-			db.DB.Commit()
-			l.Log.Info("Created commit entry:", result.Statement)
-			writeResponse(w, http.StatusOK, `{"msg": "merged"}`)
-			return
+	case *github.PushEvent:
+		for key, service := range services {
+			if service.GHRepo == e.Repo.GetURL() {
+				_, s := db.GetServiceByName(db.DB, key)
+				if s.Branch != strings.Split(utils.DerefString(e.Ref), "/")[2] {
+					l.Log.Info("Branch mismatch: ", s.Branch, " != ", strings.Split(utils.DerefString(e.Ref), "/")[2])
+					writeResponse(w, http.StatusOK, `{"msg": "Not a monitored branch"}`)
+					return
+				}
+				commitData := getCommitData(e, s)
+				db.CreateCommitEntry(db.DB, commitData)
+				l.Log.Infof("Created %d commit entries for %s", len(commitData), key)
+				writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
+				return
+			}
 		}
-		writeResponse(w, http.StatusOK, `{"msg": "PR not merged yet"}`)
+		// catch for if the service is not registered
+		l.Log.Infof("Service not found for %s", e.Repo.GetURL())
+		writeResponse(w, http.StatusOK, `{"msg": "The service is not registered"}`)
 		return
 	default:
+		l.Log.Errorf("Event type %T not supported", e)
 		writeResponse(w, http.StatusOK, `{"msg": "Event from this repo is not a push event"}`)
 		return
 	}
 }
 
-func getCommitData(g *github.PullRequestEvent, s map[string]config.Service) m.Commits {
-	commit := &m.Commits{
-		Repo:      *g.Repo.Name,
-		Ref:       *g.PullRequest.Head.Ref,
-		Title:     *g.PullRequest.Title,
-		Timestamp: *g.PullRequest.MergedAt,
-		Author:    *g.PullRequest.GetUser().Login,
-		MergedBy:  *g.PullRequest.MergedBy.Login,
-		Message:   *g.PullRequest.Body,
+func getCommitData(g *github.PushEvent, s m.Services) []m.Commits {
+	var commits []m.Commits
+	for _, commit := range g.Commits {
+		record := m.Commits{
+			ServiceID: s.ID,
+			Repo:      utils.DerefString(g.GetRepo().Name),
+			Ref:       commit.GetID(),
+			Timestamp: commit.Timestamp.Time,
+			Author:    utils.DerefString(commit.GetAuthor().Login),
+			MergedBy:  g.Pusher.GetName(),
+			Message:   commit.GetMessage(),
+		}
+		commits = append(commits, record)
 	}
 
-	return *commit
+	return commits
 }

@@ -28,13 +28,13 @@ func main() {
 }
 
 func reconcileServices(g *gorm.DB, cfg *config.Config) {
-	for _, s := range cfg.Services {
-		res, _ := db.GetServiceByName(g, s.DisplayName)
+	for key, service := range cfg.Services {
+		res, _ := db.GetServiceByName(g, key)
 		if res.RowsAffected == 0 {
-			_, service := db.CreateServiceTableEntry(g, s)
+			_, service := db.CreateServiceTableEntry(g, key, service)
 			logging.Log.Info("Created service: ", service)
 		} else {
-			logging.Log.Info("Service already exists: ", s.DisplayName)
+			logging.Log.Info("Service already exists: ", service.DisplayName)
 		}
 	}
 }

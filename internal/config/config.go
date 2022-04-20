@@ -61,7 +61,7 @@ func Get() *Config {
 	}
 
 	// global logging
-	options.SetDefault("logLevel", "INFO")
+	options.SetDefault("logLevel", os.Getenv("LOGLEVEL"))
 	options.SetDefault("Hostname", hostname)
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
@@ -113,6 +113,7 @@ func Get() *Config {
 		PublicPort:             options.GetString("publicPort"),
 		MetricsPort:            options.GetString("metricsPort"),
 		MetricsPath:            options.GetString("metricsPath"),
+		Debug:				    options.GetBool("Debug"),
 		DatabaseConfig: DatabaseCfg{
 			DBUser:     options.GetString("db.user"),
 			DBPassword: options.GetString("db.password"),

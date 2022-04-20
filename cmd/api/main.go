@@ -41,6 +41,7 @@ func main() {
 	sub.Get("/services", endpoints.GetServicesAll)
 	sub.Get("/commits", endpoints.GetCommitsAll)
 	sub.Get("/deploys", endpoints.GetDeploysAll)
+	sub.Get("/services/{service}", endpoints.GetAllByServiceName)
 
 	srv := http.Server{
 		Addr: ":" + cfg.PublicPort,
