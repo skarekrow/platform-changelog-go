@@ -50,6 +50,8 @@ func GetDeploysAll(db *gorm.DB) ([]models.Deploys) {
 	return deploys
 }
 
+// GetAllByServiceName returns all commits for a given service
+// TODO: this should include deploys once we have support for that
 func GetAllByServiceName(db *gorm.DB, name string) (*gorm.DB, models.Services) {
 	var services models.Services
 	l.Log.Debugf("Query name: %s", name)
