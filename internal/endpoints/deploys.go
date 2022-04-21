@@ -3,17 +3,14 @@ package endpoints
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
+	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 )
 
 func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
-	incRequests(r.URL.Path, r.Method, r.UserAgent())
-	start := time.Now()
+	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	result, deploys := db.GetDeploysAll(db.DB)
-	elapsed := time.Since(start)
-	observeDBTime("GetDeploysAll", elapsed)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))

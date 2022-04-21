@@ -1,9 +1,8 @@
-package endpoints
+package metrics
 
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	p "github.com/prometheus/client_golang/prometheus"
 	pa "github.com/prometheus/client_golang/prometheus/promauto"
@@ -30,22 +29,42 @@ var (
 		Help: "Total number of response codes",
 	}, []string{"code"})
 
-	dbElapsed = pa.NewHistogramVec(p.HistogramOpts{
-		Name:    "platform_changelog_db_elapsed_seconds",
-		Help:    "Elapsed time for database operations",
-	}, []string{"operation"})
+	SqlGetCommitsAll = pa.NewHistogram(p.HistogramOpts{
+		Name:    "platform_changelog_sql_get_commits_all_seconds",
+		Help:    "Elapsed time for sql lookup of all commits",
+	})
+
+	SqlGetServicesAll = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_services_all_seconds",
+		Help: "Elapsed time for sql lookup of all services",
+	})
+
+	SqlGetAllByServiceName = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_all_by_service_name_seconds",
+		Help: "Elapsed time for sql lookup of services by name",
+	})
+
+	SqlGetDeploysAll = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_deploys_all_seconds",
+		Help: "Elapsed time for sql lookup of all deploys",
+	})
+
+	SqlCreateCommitEntry = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_create_commit_entry_seconds",
+		Help: "Elapsed time for sql creation of commit entry",
+	})
 )
 
-type metricsTrackingResponseWriter struct {
+type MetricsTrackingResponseWriter struct {
 	Wrapped http.ResponseWriter
 	UserAgent string
 }
 
-func incRequests(path string, method string, userAgent string) {
+func IncRequests(path string, method string, userAgent string) {
 	requests.With(p.Labels{"path": path, "method": method, "user_agent": userAgent}).Inc()
 }
 
-func incWebhooks(source string, method string, userAgent string, err bool) {
+func IncWebhooks(source string, method string, userAgent string, err bool) {
 	if !err {
 		webhooks.With(p.Labels{"source": source, "method": method, "user_agent": userAgent}).Inc()
 	} else {
@@ -53,26 +72,22 @@ func incWebhooks(source string, method string, userAgent string, err bool) {
 	}
 }
 
-func observeDBTime(operation string, elapsed time.Duration) {
-	dbElapsed.With(p.Labels{"operation": operation}).Observe(elapsed.Seconds())
-}
-
-func (m *metricsTrackingResponseWriter) Header() http.Header {
+func (m *MetricsTrackingResponseWriter) Header() http.Header {
 	return m.Wrapped.Header()
 }
 
-func (m *metricsTrackingResponseWriter) WriteHeader(statusCode int) {
+func (m *MetricsTrackingResponseWriter) WriteHeader(statusCode int) {
 	responseCodes.With(p.Labels{"code": strconv.Itoa(statusCode)}).Inc()
 	m.Wrapped.WriteHeader(statusCode)
 }
 
-func (m *metricsTrackingResponseWriter) Write(b []byte) (int, error) {
+func (m *MetricsTrackingResponseWriter) Write(b []byte) (int, error) {
 	return m.Wrapped.Write(b)
 }
 
 func ResponseMetricsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		mw := &metricsTrackingResponseWriter{
+		mw := &MetricsTrackingResponseWriter{
 			Wrapped: w,
 			UserAgent: r.Header.Get("User-Agent"),
 		}

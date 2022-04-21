@@ -3,19 +3,17 @@ package endpoints
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
+	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 )
 
 func GetServicesAll(w http.ResponseWriter, r *http.Request) {
-	incRequests(r.URL.Path, r.Method, r.UserAgent())
-	start := time.Now()
+	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
+	
 	result, services := db.GetServicesAll(db.DB)
-	elapsed := time.Since(start)
-	observeDBTime("GetServicesAll", elapsed)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -27,12 +25,10 @@ func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllByServiceName(w http.ResponseWriter, r *http.Request) {
-	incRequests(r.URL.Path, r.Method, r.UserAgent())
+	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
+
 	serviceName := chi.URLParam(r, "service")
-	start := time.Now()
 	result, service := db.GetAllByServiceName(db.DB, serviceName)
-	elapsed := time.Since(start)
-	observeDBTime("GetAllByServiceName", elapsed)
 	if result.RowsAffected == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("Service not found"))
