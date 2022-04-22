@@ -1,8 +1,10 @@
 package db
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
+	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"gorm.io/gorm"
 )
@@ -26,33 +28,43 @@ func GetServiceByGHRepo(db *gorm.DB, service_url string) (*gorm.DB, models.Servi
 }
 
 func CreateCommitEntry(db *gorm.DB, c []models.Commits) *gorm.DB {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
+	defer callDurationTimer.ObserveDuration()
 	for _, commit := range c {
 		db.Create(&commit)
 	}
 	return db
 }
 
-func GetServicesAll(db *gorm.DB) ([]models.Services) {
+func GetServicesAll(db *gorm.DB) (*gorm.DB, []models.Services) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServicesAll)
+	defer callDurationTimer.ObserveDuration()
 	var services []models.Services
-	db.Find(&services)
-	return services
+	result := db.Find(&services)
+	return result, services
 }
 
-func GetCommitsAll(db *gorm.DB) ([]models.Commits) {
+func GetCommitsAll(db *gorm.DB) (*gorm.DB, []models.Commits) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsAll)
+	defer callDurationTimer.ObserveDuration()
 	var commits []models.Commits
-	db.Find(&commits)
-	return commits
+	result := db.Find(&commits)
+	return result, commits
 }
 
-func GetDeploysAll(db *gorm.DB) ([]models.Deploys) {
+func GetDeploysAll(db *gorm.DB) (*gorm.DB, []models.Deploys) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysAll)
+	defer callDurationTimer.ObserveDuration()
 	var deploys []models.Deploys
-	db.Find(&deploys)
-	return deploys
+	result := db.Find(&deploys)
+	return result, deploys
 }
 
 // GetAllByServiceName returns all commits for a given service
 // TODO: this should include deploys once we have support for that
 func GetAllByServiceName(db *gorm.DB, name string) (*gorm.DB, models.Services) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetAllByServiceName)
+	defer callDurationTimer.ObserveDuration()
 	var services models.Services
 	l.Log.Debugf("Query name: %s", name)
 	db.Table("services").Select("*").Where("name = ?", name).First(&services)

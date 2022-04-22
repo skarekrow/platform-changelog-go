@@ -9,6 +9,7 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
+	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	m "github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/utils"
 )
@@ -19,6 +20,8 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var payload []byte 
 
+	metrics.IncWebhooks("github", r.Method, r.UserAgent(), false)
+
 	services := config.Get().Services
 
 	if config.Get().Debug {
@@ -28,6 +31,7 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		l.Log.Error(err)
+		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 		return
 	}
 	defer r.Body.Close()
@@ -35,6 +39,7 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)
 	if err != nil {
 		l.Log.Error("could not parse webhook: err=%s\n", err)
+		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 		return
 	}
 
@@ -52,7 +57,14 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				commitData := getCommitData(e, s)
-				db.CreateCommitEntry(db.DB, commitData)
+				result := db.CreateCommitEntry(db.DB, commitData)
+				if result.Error != nil {
+					l.Log.Errorf("Failed to insert webhook data: %v", result.Error)
+					metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
+					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert webhook data"}`)
+					return
+				}
+				db.DB.Commit()
 				l.Log.Infof("Created %d commit entries for %s", len(commitData), key)
 				writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
 				return

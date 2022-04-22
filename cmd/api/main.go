@@ -10,6 +10,7 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/endpoints"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
+	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 )
 
 func lubdub(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,7 @@ func main() {
 
 	r := chi.NewRouter()
 	mr := chi.NewRouter()
-	sub := chi.NewRouter()
+	sub := chi.NewRouter().With(metrics.ResponseMetricsMiddleware)
 
 	// Mount the root of the api router on /api/v1
 	r.Mount("/api/v1", sub)

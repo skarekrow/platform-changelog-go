@@ -8,9 +8,9 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 )
 
-func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
+func GetCommitsAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
-	result, deploys := db.GetDeploysAll(db.DB)
+	result, commits := db.GetCommitsAll(db.DB)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -18,5 +18,5 @@ func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(deploys)
+	json.NewEncoder(w).Encode(commits)
 }

@@ -7,15 +7,26 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
+	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 )
 
 func GetServicesAll(w http.ResponseWriter, r *http.Request) {
+	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
+	
+	result, services := db.GetServicesAll(db.DB)
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+		return
+	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(db.GetServicesAll(db.DB))
+	json.NewEncoder(w).Encode(services)
 }
 
 func GetAllByServiceName(w http.ResponseWriter, r *http.Request) {
+	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
+
 	serviceName := chi.URLParam(r, "service")
 	result, service := db.GetAllByServiceName(db.DB, serviceName)
 	if result.RowsAffected == 0 {
