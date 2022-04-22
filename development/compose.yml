@@ -1,17 +1,21 @@
 version: '3.1'
 services:
-  # comment out platform-changelog-api stanza to disable it
-  # platform-changelog-api:
-  #     image: platform-changelog-go
-  #     ports:
-  #         - "8000:8000"
-  #     environment:
-  #         DB_HOST: "localhost"
-  #     command:
-  #         - /pc-api
-  #     depends_on:
-  #         - platform-changelog-db
-  payload-tracker-db:
+   platform-changelog-ui:
+     image: platform-changelog-ui
+     ports:
+       - "3000:3000"
+   platform-changelog-api:
+       image: platform-changelog-go
+       ports:
+           - "8000:8000"
+       environment:
+           DB_HOST: "localhost"
+           DB_NAME: "gumbaroo"
+       command:
+           - /platform-changelog-api
+       depends_on:
+           - platform-changelog-db
+   payload-tracker-db:
       image: postgres
       restart: always
       environment:
