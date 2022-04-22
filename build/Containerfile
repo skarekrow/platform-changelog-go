@@ -1,0 +1,35 @@
+FROM registry.redhat.io/ubi8/go-toolset:latest as builder
+
+WORKDIR /go/src/app
+COPY . .
+
+USER 0
+
+RUN go get -d ./... && \
+    go build -o platform-changelog-api cmd/api/main.go && \
+    go build -o platform-changelog-migrate internal/migration/main.go
+
+
+FROM registry.redhat.io/ubi8/ubi-minimal:latest
+
+WORKDIR /
+
+COPY --from=builder /go/src/app/platform-changelog-api ./platform-changelog-api
+COPY --from=builder /go/src/app/platform-changelog-migrate ./platform-changelog-migrate
+
+# install postgresql from centos if not building on RHSM system
+RUN FULL_RHEL=$(microdnf repolist --enabled | grep rhel-8) ; \
+    if [ -z "$FULL_RHEL" ] ; then \
+        rpm -Uvh http://mirror.centos.org/centos/8-stream/BaseOS/x86_64/os/Packages/centos-stream-repos-8-3.el8.noarch.rpm \
+                 http://mirror.centos.org/centos/8-stream/BaseOS/x86_64/os/Packages/centos-gpg-keys-8-3.el8.noarch.rpm && \
+        sed -i 's/^\(enabled.*\)/\1\npriority=200/;' /etc/yum.repos.d/CentOS*.repo ; \
+    fi
+
+RUN microdnf module enable postgresql:12 && \
+    microdnf install --setopt=install_weak_deps=0 --setopt=tsflags=nodocs \
+        postgresql && \
+    microdnf clean all
+
+USER 1001
+
+CMD ["/platform-changelog-api"]
