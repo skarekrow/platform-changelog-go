@@ -10,7 +10,7 @@ RUN go get -d ./... && \
     go build -o platform-changelog-migrate internal/migration/main.go
 
 
-FROM registry.redhat.io/ubi8/ubi8-minimal:8.5
+FROM registry.redhat.io/ubi8/ubi-minimal:latest
 
 WORKDIR /
 
