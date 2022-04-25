@@ -60,8 +60,13 @@ func Get() *Config {
 		hostname = "unknown"
 	}
 
+	loglevel := os.Getenv("LOGLEVEL")
+	if loglevel == "" {
+		loglevel = "ERROR"
+	}
+
 	// global logging
-	options.SetDefault("logLevel", os.Getenv("LOGLEVEL"))
+	options.SetDefault("logLevel", loglevel)
 	options.SetDefault("Hostname", hostname)
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
