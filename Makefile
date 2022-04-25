@@ -16,6 +16,14 @@ run-migration:
 	go build -o platform-changelog-migration internal/migration/main.go
 	./platform-changelog-migration
 
+run-api:
+
+	./platform-changelog-api
+
+run-db:
+
+	podman run --rm -it -p 5432:5432 --name postgres postgres:12.4
+
 compose:
 
 	podman-compose -f development/compose.yml up
