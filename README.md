@@ -31,11 +31,13 @@ To add a service to be supported by platform-changelog, follow these steps:
 
 1. Add the service to `internal/config/services.yaml`
   
+  ```yaml
   service-name:
     display_name: "Service Name"
     gh_repo: <https://github.com/org/repo>
     branch: master # branch to be monitored
     namespace: <namespace of the project>
+```
 
 2. Submit an MR to this repo. It will be approved by an owner
 
