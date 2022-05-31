@@ -22,7 +22,7 @@ run-api:
 
 run-db:
 
-	podman run --rm -it -p 5432:5432 --name postgres postgres:12.4
+	podman run --rm -it -p 5432:5432 -e POSTGRES_PASSWORD=crc -e POSTGRES_USER=crc -e POSTGRES_DB=gumbaroo --name postgres postgres:12.4
 
 compose:
 
