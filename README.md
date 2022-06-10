@@ -59,10 +59,24 @@ Docker can be substituted for podman if needed.
     $> make build
     $> make run-db
     $> make run-migration
-    $> make run-api
+    $> make run-api DEBUG=1
+
+Note: The `DEBUG` argument allows us to send webhooks without needing the secret token.
 
 The API should now be up and available on `localhost:8000`. You should be able to
 see the API in action by visiting `http://localhost:8000/api/v1/services`.
+
+### Testing Webhooks to the API Manually
+
+Launch the API as instructed above, then we can send test webhooks to the API.
+
+Test webhook json is provided in the `tests` directory in this repo.
+
+To send the webhook, you can use curl or `make test-github-webhook`. The curl command is:
+
+`curl -X POST -H "X-Github-Event: push" -H "Content-Type: application/json" --data "@tests/github_webhook.json" http://localhost:8000/api/v1/github-webhook`
+
+From there, you should be able to open a browser and see the results at: http://localhost:8000/api/v1/commits. There should be commits matching the webhook data that was sent.
 
 ## Running Tests
 
