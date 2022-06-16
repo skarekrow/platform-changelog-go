@@ -19,7 +19,6 @@ func lubdub(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("lubdub"))
 }
 
-
 func main() {
 
 	logging.InitLogger()
@@ -40,18 +39,19 @@ func main() {
 	mr.Get("/healthz", lubdub)
 	mr.Handle("/metrics", promhttp.Handler())
 	sub.Post("/github-webhook", endpoints.GithubWebhook)
+	sub.Post("/gitlab-webhook", endpoints.GitlabWebhook)
 	sub.Get("/services", endpoints.GetServicesAll)
 	sub.Get("/commits", endpoints.GetCommitsAll)
 	sub.Get("/deploys", endpoints.GetDeploysAll)
 	sub.Get("/services/{service}", endpoints.GetAllByServiceName)
 
 	srv := http.Server{
-		Addr: ":" + cfg.PublicPort,
+		Addr:    ":" + cfg.PublicPort,
 		Handler: r,
 	}
 
 	msrv := http.Server{
-		Addr: ":" + cfg.MetricsPort,
+		Addr:    ":" + cfg.MetricsPort,
 		Handler: mr,
 	}
 

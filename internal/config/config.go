@@ -23,8 +23,9 @@ type Config struct {
 	CloudwatchConfig       CloudwatchCfg
 	DatabaseConfig         DatabaseCfg
 	GithubWebhookSecretKey string
+	GitlabWebhookSecretKey string
 	Services               map[string]Service
-	Debug				   bool
+	Debug                  bool
 }
 
 type DatabaseCfg struct {
@@ -46,7 +47,7 @@ type CloudwatchCfg struct {
 type Service struct {
 	DisplayName string `yaml:"display_name"`
 	GHRepo      string `yaml:"gh_repo,omitempty"`
-	GLRepo		string `yaml:"gl_repo,omitempty"`
+	GLRepo      string `yaml:"gl_repo,omitempty"`
 	Branch      string `yaml:"branch"`
 	Namespace   string `yaml:"namespace,omitempty"`
 	DeployFile  string `yaml:"deploy_file,omitempty"`
@@ -69,6 +70,7 @@ func Get() *Config {
 	options.SetDefault("logLevel", loglevel)
 	options.SetDefault("Hostname", hostname)
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
+	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_SECRET_KEY"))
 	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
 
 	if clowder.IsClowderEnabled() {
@@ -118,7 +120,7 @@ func Get() *Config {
 		PublicPort:             options.GetString("publicPort"),
 		MetricsPort:            options.GetString("metricsPort"),
 		MetricsPath:            options.GetString("metricsPath"),
-		Debug:				    options.GetBool("Debug"),
+		Debug:                  options.GetBool("Debug"),
 		DatabaseConfig: DatabaseCfg{
 			DBUser:     options.GetString("db.user"),
 			DBPassword: options.GetString("db.password"),

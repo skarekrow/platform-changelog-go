@@ -18,7 +18,7 @@ import (
 func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	var payload []byte 
+	var payload []byte
 
 	metrics.IncWebhooks("github", r.Method, r.UserAgent(), false)
 
