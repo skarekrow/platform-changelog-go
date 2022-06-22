@@ -14,3 +14,8 @@ services:
     gh_repo: https://github.com/RedHatInsights/insights-ingress-go
     branch: master
     namespace: ingress-prod
+  insights-engine:
+    display_name: Insights Engine
+    gl_repo: https://gitlab.cee.redhat.com/insights-platform/insights-engine
+    branch: main
+    namespace: engine-prod
