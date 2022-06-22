@@ -16,7 +16,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func GetURL(p *gitlab.PushEvent) string {
+func getURL(p *gitlab.PushEvent) string {
 	if p == nil || p.Repository == nil {
 		return ""
 	}
@@ -30,7 +30,7 @@ func GetRepo(p *gitlab.PushEvent) *gitlab.Repository {
 	return p.Repository
 }
 
-func GetID(p *struct {
+type RepInfo *struct {
 	ID        string     "json:\"id\""
 	Message   string     "json:\"message\""
 	Title     string     "json:\"title\""
@@ -43,7 +43,9 @@ func GetID(p *struct {
 	Added    []string "json:\"added\""
 	Modified []string "json:\"modified\""
 	Removed  []string "json:\"removed\""
-}) string {
+}
+
+func GetID(p RepInfo) string {
 	if p == nil {
 		return ""
 	}
@@ -67,20 +69,7 @@ type PingEvent struct {
 	//Installation *Installation `json:"installation,omitempty"`
 }
 
-func GetAuthor(p *struct {
-	ID        string     "json:\"id\""
-	Message   string     "json:\"message\""
-	Title     string     "json:\"title\""
-	Timestamp *time.Time "json:\"timestamp\""
-	URL       string     "json:\"url\""
-	Author    struct {
-		Name  string "json:\"name\""
-		Email string "json:\"email\""
-	} "json:\"author\""
-	Added    []string "json:\"added\""
-	Modified []string "json:\"modified\""
-	Removed  []string "json:\"removed\""
-}) string {
+func GetAuthor(p RepInfo) string {
 	if p == nil {
 		return ""
 	}
@@ -153,7 +142,7 @@ func GitlabWebhook(w http.ResponseWriter, r *http.Request) {
 
 	case *gitlab.PushEvent:
 		for key, service := range services {
-			if service.GLRepo == GetURL(e) {
+			if service.GLRepo == getURL(e) {
 				_, s := db.GetServiceByName(db.DB, key)
 				if s.Branch != strings.Split((e.Ref), "/")[2] {
 					l.Log.Info("Branch mismatch: ", s.Branch, " != ", strings.Split((e.Ref), "/")[2])
@@ -175,8 +164,8 @@ func GitlabWebhook(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		// catch for if the service is not registered
-		l.Log.Infof("Service not found for %s", GetURL(e))
-		fmt.Println(GetURL(e))
+		l.Log.Infof("Service not found for %s", getURL(e))
+		fmt.Println(getURL(e))
 
 		writeResponse(w, http.StatusOK, `{"msg": "The service is not registered"}`)
 		return
