@@ -23,7 +23,7 @@ func getURL(p *gitlab.PushEvent) string {
 	return p.Repository.Homepage
 }
 
-func GetRepo(p *gitlab.PushEvent) *gitlab.Repository {
+func getRepo(p *gitlab.PushEvent) *gitlab.Repository {
 	if p == nil || p.Repository == nil {
 		return nil
 	}
@@ -45,14 +45,14 @@ type RepInfo *struct {
 	Removed  []string "json:\"removed\""
 }
 
-func GetID(p RepInfo) string {
+func getID(p RepInfo) string {
 	if p == nil {
 		return ""
 	}
 	return p.ID
 }
 
-func GetTime(p *time.Time) time.Time {
+func getTime(p *time.Time) time.Time {
 	if p == nil {
 		return time.Time{}
 	}
@@ -69,34 +69,21 @@ type PingEvent struct {
 	//Installation *Installation `json:"installation,omitempty"`
 }
 
-func GetAuthor(p RepInfo) string {
+func getAuthor(p RepInfo) string {
 	if p == nil {
 		return ""
 	}
 	return p.Author.Name
 }
 
-func GetName(p *gitlab.PushEvent) string {
+func getName(p *gitlab.PushEvent) string {
 	if p == nil {
 		return ""
 	}
 	return p.UserName
 }
 
-func GetMessage(p *struct {
-	ID        string     "json:\"id\""
-	Message   string     "json:\"message\""
-	Title     string     "json:\"title\""
-	Timestamp *time.Time "json:\"timestamp\""
-	URL       string     "json:\"url\""
-	Author    struct {
-		Name  string "json:\"name\""
-		Email string "json:\"email\""
-	} "json:\"author\""
-	Added    []string "json:\"added\""
-	Modified []string "json:\"modified\""
-	Removed  []string "json:\"removed\""
-}) string {
+func getMessage(p RepInfo) string {
 	if p == nil {
 		return ""
 	}
@@ -181,12 +168,12 @@ func getCommitData2(g *gitlab.PushEvent, s m.Services) []m.Commits {
 	for _, commit := range g.Commits {
 		record := m.Commits{
 			ServiceID: s.ID,
-			Repo:      GetRepo(g).Name,
-			Ref:       GetID(commit),
-			Timestamp: GetTime(commit.Timestamp),
-			Author:    GetAuthor(commit),
-			MergedBy:  GetName(g),
-			Message:   GetMessage(commit),
+			Repo:      getRepo(g).Name,
+			Ref:       getID(commit),
+			Timestamp: getTime(commit.Timestamp),
+			Author:    getAuthor(commit),
+			MergedBy:  getName(g),
+			Message:   getMessage(commit),
 		}
 		commits = append(commits, record)
 	}
