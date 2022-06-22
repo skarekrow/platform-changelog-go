@@ -1,71 +1,107 @@
 {
-    "object_kind": "push",
-    "event_name": "push",
-    "before": "95790bf891e76fee5e1747ab589903a6a1f80f22",
-    "after": "da1560886d4f094c3e6c9ef40349f7d38b5d27d7",
-    "ref": "refs/heads/master",
-    "checkout_sha": "da1560886d4f094c3e6c9ef40349f7d38b5d27d7",
-    "user_id": 4,
-    "user_name": "John Smith",
-    "user_username": "jsmith",
-    "user_email": "john@example.com",
-    "user_avatar": "https://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=8://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80",
-    "project_id": 15,
-    "project":{
-      "id": 15,
-      "name":"Diaspora",
-      "description":"",
-      "web_url":"http://example.com/mike/diaspora",
-      "avatar_url":null,
-      "git_ssh_url":"git@example.com:mike/diaspora.git",
-      "git_http_url":"http://example.com/mike/diaspora.git",
-      "namespace":"Mike",
-      "visibility_level":0,
-      "path_with_namespace":"mike/diaspora",
-      "default_branch":"master",
-      "homepage":"http://example.com/mike/diaspora",
-      "url":"git@example.com:mike/diaspora.git",
-      "ssh_url":"git@example.com:mike/diaspora.git",
-      "http_url":"http://example.com/mike/diaspora.git"
-    },
-    "repository":{
-      "name": "Diaspora",
-      "url": "git@example.com:mike/diaspora.git",
-      "description": "",
-      "homepage": "http://example.com/mike/diaspora",
-      "git_http_url":"http://example.com/mike/diaspora.git",
-      "git_ssh_url":"git@example.com:mike/diaspora.git",
-      "visibility_level":0
-    },
-    "commits": [
-      {
-        "id": "b6568db1bc1dcd7f8b4d5a946b0b91f9dacd7327",
-        "message": "Update Catalan translation to e38cb41.\n\nSee https://gitlab.com/gitlab-org/gitlab for more information",
-        "title": "Update Catalan translation to e38cb41.",
-        "timestamp": "2011-12-12T14:27:31+02:00",
-        "url": "http://example.com/mike/diaspora/commit/b6568db1bc1dcd7f8b4d5a946b0b91f9dacd7327",
-        "author": {
-          "name": "Jordi Mallach",
-          "email": "jordi@softcatala.org"
-        },
-        "added": ["CHANGELOG"],
-        "modified": ["app/controller/application.rb"],
-        "removed": []
+  "object_kind": "push",
+  "event_name": "push",
+  "before": "571b2048e118287012ab23ef45879e19239a4a40",
+  "after": "f456366470c936253f8a9ccd6efa2e37b34a9f2e",
+  "ref": "refs/heads/master",
+  "checkout_sha": "f456366470c936253f8a9ccd6efa2e37b34a9f2e",
+  "message": null,
+  "user_id": 2059,
+  "user_name": "Stephen Adams",
+  "user_username": "sadams",
+  "user_email": "",
+  "user_avatar": "https://gitlab.cee.redhat.com/uploads/-/system/user/avatar/2059/avatar.png",
+  "project_id": 29289,
+  "project": {
+    "id": 29289,
+    "name": "insights-engine",
+    "description": "",
+    "web_url": "https://gitlab.cee.redhat.com/insights-platform/insights-engine",
+    "avatar_url": null,
+    "git_ssh_url": "git@gitlab.cee.redhat.com:insights-platform/insights-engine.git",
+    "git_http_url": "https://gitlab.cee.redhat.com/insights-platform/insights-engine.git",
+    "namespace": "insights-platform",
+    "visibility_level": 20,
+    "path_with_namespace": "insights-platform/insights-engine",
+    "default_branch": "master",
+    "ci_config_path": "",
+    "homepage": "https://gitlab.cee.redhat.com/insights-platform/insights-engine",
+    "url": "git@gitlab.cee.redhat.com:insights-platform/insights-engine.git",
+    "ssh_url": "git@gitlab.cee.redhat.com:insights-platform/insights-engine.git",
+    "http_url": "https://gitlab.cee.redhat.com/insights-platform/insights-engine.git"
+  },
+  "commits": [
+    {
+      "id": "f456366470c936253f8a9ccd6efa2e37b34a9f2e",
+      "message": "Update insights core to 279 release\n\nSigned-off-by: Bob Fahr <20520336+bfahr@users.noreply.github.com>\n",
+      "title": "Update insights core to 279 release",
+      "timestamp": "2022-06-17T09:17:40-05:00",
+      "url": "https://gitlab.cee.redhat.com/insights-platform/insights-engine/-/commit/f456366470c936253f8a9ccd6efa2e37b34a9f2e",
+      "author": {
+        "name": "Bob Fahr",
+        "email": "20520336+bfahr@users.noreply.github.com"
       },
-      {
-        "id": "da1560886d4f094c3e6c9ef40349f7d38b5d27d7",
-        "message": "fixed readme",
-        "title": "fixed readme",
-        "timestamp": "2012-01-03T23:36:29+02:00",
-        "url": "http://example.com/mike/diaspora/commit/da1560886d4f094c3e6c9ef40349f7d38b5d27d7",
-        "author": {
-          "name": "GitLab dev user",
-          "email": "gitlabdev@dv6700.(none)"
-        },
-        "added": ["CHANGELOG"],
-        "modified": ["app/controller/application.rb"],
-        "removed": []
-      }
-    ],
-    "total_commits_count": 4
+      "added": [
+
+      ],
+      "modified": [
+        "setup.py"
+      ],
+      "removed": [
+
+      ]
+    },
+    {
+      "id": "14f359622dc06b36361776ffca6398d3993445aa",
+      "message": "insights-core release 3.0.278 and insights-plugins release 2.0.222\n\nSigned-off-by: Sachin Patil <psachin@redhat.com>\n",
+      "title": "insights-core release 3.0.278 and insights-plugins release 2.0.222",
+      "timestamp": "2022-06-16T11:51:25+05:30",
+      "url": "https://gitlab.cee.redhat.com/insights-platform/insights-engine/-/commit/14f359622dc06b36361776ffca6398d3993445aa",
+      "author": {
+        "name": "Sachin Patil",
+        "email": "psachin@redhat.com"
+      },
+      "added": [
+
+      ],
+      "modified": [
+        "setup.py"
+      ],
+      "removed": [
+
+      ]
+    },
+    {
+      "id": "571b2048e118287012ab23ef45879e19239a4a40",
+      "message": "Update insights-core to 3.0.277 and insights-plugins to 2.0.221\n",
+      "title": "Update insights-core to 3.0.277 and insights-plugins to 2.0.221",
+      "timestamp": "2022-06-09T07:04:46+00:00",
+      "url": "https://gitlab.cee.redhat.com/insights-platform/insights-engine/-/commit/571b2048e118287012ab23ef45879e19239a4a40",
+      "author": {
+        "name": "Xiangce Liu",
+        "email": "xiangceliu@redhat.com"
+      },
+      "added": [
+
+      ],
+      "modified": [
+        "setup.py"
+      ],
+      "removed": [
+
+      ]
+    }
+  ],
+  "total_commits_count": 3,
+  "push_options": {
+  },
+  "repository": {
+    "name": "insights-engine",
+    "url": "git@gitlab.cee.redhat.com:insights-platform/insights-engine.git",
+    "description": "",
+    "homepage": "https://gitlab.cee.redhat.com/insights-platform/insights-engine",
+    "git_http_url": "https://gitlab.cee.redhat.com/insights-platform/insights-engine.git",
+    "git_ssh_url": "git@gitlab.cee.redhat.com:insights-platform/insights-engine.git",
+    "visibility_level": 20
   }
+}
