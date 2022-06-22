@@ -20,7 +20,7 @@ func GetURL(p *gitlab.PushEvent) string {
 	if p == nil || p.Repository == nil {
 		return ""
 	}
-	return p.Repository.URL
+	return p.Repository.Homepage
 }
 
 func GetRepo(p *gitlab.PushEvent) *gitlab.Repository {
