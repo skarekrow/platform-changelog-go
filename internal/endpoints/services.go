@@ -12,7 +12,7 @@ import (
 
 func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
-	
+
 	result, services := db.GetServicesAll(db.DB)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -29,7 +29,20 @@ func GetAllByServiceName(w http.ResponseWriter, r *http.Request) {
 
 	serviceName := chi.URLParam(r, "service")
 	result, service := db.GetAllByServiceName(db.DB, serviceName)
-	if result.RowsAffected == 0 {
+
+	/**
+	 * Couldn't get the commits table
+	 */
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+		return
+	}
+
+	/**
+	 * the service doesn't exist
+	 */
+	if service.ID == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("Service not found"))
 		return
