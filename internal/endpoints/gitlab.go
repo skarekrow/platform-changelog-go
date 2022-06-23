@@ -31,18 +31,18 @@ func getRepo(p *gitlab.PushEvent) *gitlab.Repository {
 }
 
 type RepInfo *struct {
-	ID        string     "json:\"id\""
-	Message   string     "json:\"message\""
-	Title     string     "json:\"title\""
-	Timestamp *time.Time "json:\"timestamp\""
-	URL       string     "json:\"url\""
+	ID        string     `json:"id"`
+	Message   string     `json:"message"`
+	Title     string     `json:"title"`
+	Timestamp *time.Time `json:"timestamp"`
+	URL       string     `json:"url"`
 	Author    struct {
-		Name  string "json:\"name\""
-		Email string "json:\"email\""
-	} "json:\"author\""
-	Added    []string "json:\"added\""
-	Modified []string "json:\"modified\""
-	Removed  []string "json:\"removed\""
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	} `json:"author"`
+	Added    []string `json:"added"`
+	Modified []string `json:"modified"`
+	Removed  []string `json:"removed"`
 }
 
 func getID(p RepInfo) string {
