@@ -30,6 +30,10 @@ test-github-webhook:
 
 	curl -X POST -H "X-Github-Event: push" -H "Content-Type: application/json" --data "@tests/github_webhook.json" http://localhost:8000/api/v1/github-webhook
 
+test-gitlab-webhook:
+
+	curl -X POST -H "X-Gitlab-Event: Push Hook" -H "Content-Type: application/json" --data "@tests/gitlab_webhook.json" http://localhost:8000/api/v1/gitlab-webhook
+
 compose:
 
 	podman-compose -f development/compose.yml up
