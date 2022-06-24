@@ -17,5 +17,5 @@ services:
   insights-engine:
     display_name: Insights Engine
     gl_repo: https://gitlab.cee.redhat.com/insights-platform/insights-engine
-    branch: main
+    branch: master 
     namespace: engine-prod
