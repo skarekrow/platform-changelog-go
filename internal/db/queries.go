@@ -36,30 +36,6 @@ func CreateCommitEntry(db *gorm.DB, c []models.Commits) *gorm.DB {
 	return db
 }
 
-func GetServicesAll(db *gorm.DB) (*gorm.DB, []models.Services) {
-	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServicesAll)
-	defer callDurationTimer.ObserveDuration()
-	var services []models.Services
-	result := db.Find(&services)
-	return result, services
-}
-
-func GetCommitsAll(db *gorm.DB) (*gorm.DB, []models.Commits) {
-	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsAll)
-	defer callDurationTimer.ObserveDuration()
-	var commits []models.Commits
-	result := db.Find(&commits)
-	return result, commits
-}
-
-func GetDeploysAll(db *gorm.DB) (*gorm.DB, []models.Deploys) {
-	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysAll)
-	defer callDurationTimer.ObserveDuration()
-	var deploys []models.Deploys
-	result := db.Find(&deploys)
-	return result, deploys
-}
-
 // GetAllByServiceName returns all commits for a given service
 // TODO: this should include deploys once we have support for that
 func GetAllByServiceName(db *gorm.DB, name string) (*gorm.DB, models.Services) {
@@ -68,8 +44,47 @@ func GetAllByServiceName(db *gorm.DB, name string) (*gorm.DB, models.Services) {
 	var services models.Services
 	l.Log.Debugf("Query name: %s", name)
 	db.Table("services").Select("*").Where("name = ?", name).First(&services)
-	//db.Table("services").Select("*").Where("name = ?", name).Order("Timestamp desc").Find(&services)
-	//result := db.Table("commits").Select("*").Joins("JOIN services ON commits.service_id = services.id").Where("services.name = ?", name).Find(&services.Commits)
 	result := db.Table("commits").Select("*").Joins("JOIN services ON commits.service_id = services.id").Where("services.name = ?", name).Order("Timestamp desc").Find(&services.Commits)
 	return result, services
+}
+
+func GetLatest(db *gorm.DB, service models.Services) (*gorm.DB, models.Services) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetAllByServiceName)
+	defer callDurationTimer.ObserveDuration()
+	l.Log.Debugf("Query name: %s", service.Name)
+	result := db.Table("commits").Select("*").Joins("JOIN services ON commits.service_id = services.id").Where("services.name = ?", service.Name).Order("Timestamp desc").Limit(1).Find(&service.Commits)
+	return result, service
+}
+
+func GetServicesAll(db *gorm.DB) (*gorm.DB, []models.Services, []models.Services) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServicesAll)
+	defer callDurationTimer.ObserveDuration()
+	var services []models.Services
+	result := db.Find(&services)
+
+	var latest_commits []models.Services
+	for i := 0; i < len(services); i++ {
+
+		_, s := GetLatest(db, services[i])
+		latest_commits = append(latest_commits, s)
+
+	}
+
+	return result, services, latest_commits
+}
+
+func GetCommitsAll(db *gorm.DB) (*gorm.DB, []models.Commits) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsAll)
+	defer callDurationTimer.ObserveDuration()
+	var commits []models.Commits
+	result := db.Order("Timestamp desc").Find(&commits)
+	return result, commits
+}
+
+func GetDeploysAll(db *gorm.DB) (*gorm.DB, []models.Deploys) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysAll)
+	defer callDurationTimer.ObserveDuration()
+	var deploys []models.Deploys
+	result := db.Order("Timestamp desc").Find(&deploys)
+	return result, deploys
 }
