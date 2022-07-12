@@ -14,7 +14,7 @@ func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	//result, services := db.GetServicesAll(db.DB)
 
-	result, _, latest_commits := db.GetServicesAll(db.DB)
+	result, _, servicesWithCommits := db.GetServicesAll(db.DB)
 	if result.Error != nil {
 
 		w.WriteHeader(http.StatusInternalServerError)
@@ -24,7 +24,7 @@ func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 
-	json.NewEncoder(w).Encode(latest_commits)
+	json.NewEncoder(w).Encode(servicesWithCommits)
 
 }
 
