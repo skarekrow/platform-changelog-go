@@ -63,15 +63,15 @@ func GetServicesAll(db *gorm.DB) (*gorm.DB, []models.Services, []models.Services
 	var services []models.Services
 	result := db.Find(&services)
 
-	var latest_commits []models.Services
+	var servicesWithCommits []models.Services
 	for i := 0; i < len(services); i++ {
 
 		_, s := GetLatest(db, services[i])
-		latest_commits = append(latest_commits, s)
+		servicesWithCommits = append(servicesWithCommits, s)
 
 	}
 
-	return result, services, latest_commits
+	return result, services, servicesWithCommits
 }
 
 func GetCommitsAll(db *gorm.DB) (*gorm.DB, []models.Commits) {
