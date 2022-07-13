@@ -24,7 +24,8 @@ func CreateServiceTableEntry(db *gorm.DB, name string, s config.Service) (result
 func GetServiceByGHRepo(db *gorm.DB, service_url string) (*gorm.DB, models.Services) {
 	var service models.Services
 	result := db.Where("gh_repo = ?", service_url).First(&service)
-	services.Deploys = []models.Deploys{}return result, service
+	service.Deploys = []models.Deploys{}
+	return result, service
 }
 
 func CreateCommitEntry(db *gorm.DB, c []models.Commits) *gorm.DB {
