@@ -24,7 +24,8 @@ func CreateServiceTableEntry(db *gorm.DB, name string, s config.Service) (result
 func GetServiceByGHRepo(db *gorm.DB, service_url string) (*gorm.DB, models.Services) {
 	var service models.Services
 	result := db.Where("gh_repo = ?", service_url).First(&service)
-	services.Deploys = []models.Deploys{}return result, service
+
+	return result, service
 }
 
 func CreateCommitEntry(db *gorm.DB, c []models.Commits) *gorm.DB {
@@ -45,7 +46,7 @@ func GetAllByServiceName(db *gorm.DB, name string) (*gorm.DB, models.Services) {
 	l.Log.Debugf("Query name: %s", name)
 	db.Table("services").Select("*").Where("name = ?", name).First(&services)
 	result := db.Table("commits").Select("*").Joins("JOIN services ON commits.service_id = services.id").Where("services.name = ?", name).Order("Timestamp desc").Find(&services.Commits)
-  services.Deploys = []models.Deploys{}
+	services.Deploys = []models.Deploys{}
 	return result, services
 }
 
