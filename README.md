@@ -56,7 +56,7 @@ Docker can be substituted for podman if needed.
 
 ### Launching
 
-    $> make build
+    $> make -B build
     $> make run-db
     $> make run-migration
     $> make run-api DEBUG=1
