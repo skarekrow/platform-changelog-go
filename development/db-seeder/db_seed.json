@@ -1,0 +1,73 @@
+{
+    "services": [
+        {
+            "name": "ingress",
+            "display_name": "Ingress",
+            "gh_repo": "https://www.github.com/redhatinsights/insights-ingress-go",
+            "namespace": "ingress-prod",
+            "branch": "master"
+        },
+        {
+            "name": "rbac",
+            "display_name": "RBAC",
+            "gh_repo": "https://www.github.com/redhatinsights/insights-rbac",
+            "namespace": "rbac-prod",
+            "branch": "master"
+        },
+        {
+            "name": "insights-engine",
+            "display_name": "Insights Engine",
+            "gl_repo": "https://gitlab.cee.redhat.com/insights-platform/insights-engine",
+            "namespace": "engine-prod",
+            "branch": "master"
+        }
+    ],
+    "commits": [
+        {
+            "service_id": 1,
+            "repo": "insights-ingress-go",
+            "ref": "93e43ddaa21ec1dc844a3737576bbe4143e0f989",
+            "timestamp": "2020-01-01T00:00:00Z",
+            "author": "John Doe",
+            "merged_by": "MergerBoss",
+            "message": "this is a generated commit"
+        },
+        {
+            "service_id": 1,
+            "repo": "insights-ingress-go",
+            "ref": "93e43ddaa21ec1dd844a3737576bbe4143e0f989",
+            "timestamp": "2020-01-02T00:00:00Z",
+            "author": "John Doe",
+            "merged_by": "MergerBoss",
+            "message": "this is another generated commit"
+        },
+        {
+            "service_id": 1,
+            "repo": "insights-ingress-go",
+            "ref": "94e43ddaa21ec1dd844a3737576bbe4143e0f989",
+            "timestamp": "2020-01-03T00:00:00Z",
+            "author": "John Doe",
+            "merged_by": "MergerBoss",
+            "message": "this is the latest generated commit"
+        },
+        {
+            "service_id": 3,
+            "repo": "insights-engine",
+            "ref": "93e43ddaa21ec1dd844a3737576bbe4143e0f990",
+            "timestamp": "2020-01-01T10:00:00Z",
+            "author": "Jimmy John",
+            "merged_by": "MergerBoss",
+            "message": "Engine commit number one"
+        },
+        {
+            "service_id": 3,
+            "repo": "insights-engine",
+            "ref": "93e83ddaa21ec1dd844a3737576bbe4143e0f990",
+            "timestamp": "2020-01-01T11:00:00Z",
+            "author": "Jimmy John",
+            "merged_by": "MergerBoss",
+            "message": "Engine commit number two"
+        }
+
+    ]
+}
