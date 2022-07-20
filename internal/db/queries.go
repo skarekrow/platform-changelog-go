@@ -6,6 +6,7 @@ import (
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 	"gorm.io/gorm"
 )
 
@@ -31,9 +32,15 @@ func GetServiceByGHRepo(db *gorm.DB, service_url string) (*gorm.DB, models.Servi
 func CreateCommitEntry(db *gorm.DB, c []models.Commits) *gorm.DB {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
 	defer callDurationTimer.ObserveDuration()
+
 	for _, commit := range c {
 		db.Create(&commit)
+
+		// Add a timeline entry for this commit to the db
+		timeline := models.Timelines{CommitID: commit.ID, ServiceID: commit.ServiceID, Timestamp: commit.Timestamp}
+		db.Omit("DeployID", "Deploy").Create(&timeline)
 	}
+
 	return db
 }
 
@@ -42,12 +49,15 @@ func CreateCommitEntry(db *gorm.DB, c []models.Commits) *gorm.DB {
 func GetAllByServiceName(db *gorm.DB, name string) (*gorm.DB, models.Services) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetAllByServiceName)
 	defer callDurationTimer.ObserveDuration()
-	var services models.Services
+	var service models.Services
+
 	l.Log.Debugf("Query name: %s", name)
-	db.Table("services").Select("*").Where("name = ?", name).First(&services)
-	result := db.Table("commits").Select("*").Joins("JOIN services ON commits.service_id = services.id").Where("services.name = ?", name).Order("Timestamp desc").Find(&services.Commits)
-	services.Deploys = []models.Deploys{}
-	return result, services
+
+	// TODO: this should be one query that utilizes the structs defined in structs.go
+	db.Table("services").Select("*").Where("name = ?", name).First(&service)
+	result := db.Table("commits").Select("*").Joins("JOIN services ON commits.service_id = services.id").Where("services.name = ?", name).Order("Timestamp desc").Find(&service.Commits)
+	service.Deploys = []models.Deploys{}
+	return result, service
 }
 
 func GetLatest(db *gorm.DB, service models.Services) (*gorm.DB, models.Services) {
@@ -66,10 +76,8 @@ func GetServicesAll(db *gorm.DB) (*gorm.DB, []models.Services, []models.Services
 
 	var servicesWithCommits []models.Services
 	for i := 0; i < len(services); i++ {
-
 		_, s := GetLatest(db, services[i])
 		servicesWithCommits = append(servicesWithCommits, s)
-
 	}
 
 	return result, services, servicesWithCommits
@@ -89,4 +97,19 @@ func GetDeploysAll(db *gorm.DB) (*gorm.DB, []models.Deploys) {
 	var deploys []models.Deploys
 	result := db.Order("Timestamp desc").Find(&deploys)
 	return result, deploys
+}
+
+/**
+ * GetTimeline returns a timeline of commits and deploys for a service
+ */
+func GetTimeline(db *gorm.DB, service models.Services) (*gorm.DB, []structs.TimelineData) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimeline)
+	defer callDurationTimer.ObserveDuration()
+
+	var timeline []structs.TimelineData
+
+	// Joins the timeline table to the commits and deploys tables and into the TimelineData struct
+	result := db.Debug().Model(models.Timelines{}).Select("*").Joins("JOIN commits ON timelines.commit_id = commits.id").Where("timelines.service_id = ?", service.ID).Scan(&timeline)
+
+	return result, timeline
 }

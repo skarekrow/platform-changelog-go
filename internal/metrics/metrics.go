@@ -30,8 +30,8 @@ var (
 	}, []string{"code"})
 
 	SqlGetCommitsAll = pa.NewHistogram(p.HistogramOpts{
-		Name:    "platform_changelog_sql_get_commits_all_seconds",
-		Help:    "Elapsed time for sql lookup of all commits",
+		Name: "platform_changelog_sql_get_commits_all_seconds",
+		Help: "Elapsed time for sql lookup of all commits",
 	})
 
 	SqlGetServicesAll = pa.NewHistogram(p.HistogramOpts{
@@ -53,10 +53,15 @@ var (
 		Name: "platform_changelog_sql_create_commit_entry_seconds",
 		Help: "Elapsed time for sql creation of commit entry",
 	})
+
+	SqlGetTimeline = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_timeline_seconds",
+		Help: "Elapsed time for sql lookup of timeline entry",
+	})
 )
 
 type MetricsTrackingResponseWriter struct {
-	Wrapped http.ResponseWriter
+	Wrapped   http.ResponseWriter
 	UserAgent string
 }
 
@@ -88,7 +93,7 @@ func (m *MetricsTrackingResponseWriter) Write(b []byte) (int, error) {
 func ResponseMetricsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mw := &MetricsTrackingResponseWriter{
-			Wrapped: w,
+			Wrapped:   w,
 			UserAgent: r.Header.Get("User-Agent"),
 		}
 		next.ServeHTTP(mw, r)

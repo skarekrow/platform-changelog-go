@@ -20,6 +20,7 @@ func main() {
 		&models.Services{},
 		&models.Commits{},
 		&models.Deploys{},
+		&models.Timelines{},
 	)
 
 	logging.Log.Info("DB Migration Complete")

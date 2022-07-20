@@ -12,7 +12,6 @@ import (
 
 func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
-	//result, services := db.GetServicesAll(db.DB)
 
 	result, _, servicesWithCommits := db.GetServicesAll(db.DB)
 	if result.Error != nil {
