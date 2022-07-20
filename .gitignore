@@ -20,4 +20,5 @@ go.work
 # built executables
 platform-changelog-api
 platform-changelog-migration
+seeder
 main

@@ -1,32 +1,8 @@
 {
-    "services": [
-        {
-            "name": "ingress",
-            "display_name": "Ingress",
-            "gh_repo": "https://www.github.com/redhatinsights/insights-ingress-go",
-            "namespace": "ingress-prod",
-            "branch": "master"
-        },
-        {
-            "name": "rbac",
-            "display_name": "RBAC",
-            "gh_repo": "https://www.github.com/redhatinsights/insights-rbac",
-            "namespace": "rbac-prod",
-            "branch": "master"
-        },
-        {
-            "name": "insights-engine",
-            "display_name": "Insights Engine",
-            "gl_repo": "https://gitlab.cee.redhat.com/insights-platform/insights-engine",
-            "namespace": "engine-prod",
-            "branch": "master"
-        }
-    ],
     "commits": [
         {
             "service_id": 1,
             "repo": "insights-ingress-go",
-            "ref": "93e43ddaa21ec1dc844a3737576bbe4143e0f989",
             "timestamp": "2020-01-01T00:00:00Z",
             "author": "John Doe",
             "merged_by": "MergerBoss",
@@ -35,7 +11,6 @@
         {
             "service_id": 1,
             "repo": "insights-ingress-go",
-            "ref": "93e43ddaa21ec1dd844a3737576bbe4143e0f989",
             "timestamp": "2020-01-02T00:00:00Z",
             "author": "John Doe",
             "merged_by": "MergerBoss",
@@ -44,7 +19,6 @@
         {
             "service_id": 1,
             "repo": "insights-ingress-go",
-            "ref": "94e43ddaa21ec1dd844a3737576bbe4143e0f989",
             "timestamp": "2020-01-03T00:00:00Z",
             "author": "John Doe",
             "merged_by": "MergerBoss",
@@ -53,7 +27,6 @@
         {
             "service_id": 3,
             "repo": "insights-engine",
-            "ref": "93e43ddaa21ec1dd844a3737576bbe4143e0f990",
             "timestamp": "2020-01-01T10:00:00Z",
             "author": "Jimmy John",
             "merged_by": "MergerBoss",
@@ -62,12 +35,26 @@
         {
             "service_id": 3,
             "repo": "insights-engine",
-            "ref": "93e83ddaa21ec1dd844a3737576bbe4143e0f990",
             "timestamp": "2020-01-01T11:00:00Z",
             "author": "Jimmy John",
             "merged_by": "MergerBoss",
             "message": "Engine commit number two"
         }
-
+    ],
+    "deploys": [
+        {
+            "name": "ingress",
+            "namespace": "ingress-prod",
+            "cluster": "crcp01ue1",
+            "image": "insights-ingress-go:912de8f",
+            "timestamp": "2020-01-03T00:02:00Z"
+        },
+        {
+            "name": "insights-engine",
+            "namespace": "engine-prod",
+            "cluster": "crcp01ue1",
+            "image": "insights-engine:212de8e",
+            "timestamp": "2020-01-03T00:02:00Z"
+        }
     ]
 }
