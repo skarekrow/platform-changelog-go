@@ -1,6 +1,9 @@
 package db
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
@@ -8,6 +11,12 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 	"gorm.io/gorm"
+)
+
+var (
+	timelineFields = []string{"timelines.id", "timelines.timestamp", "timelines.service_id", "timelines.commit_id", "timelines.deploy_id"}
+	commitFields   = []string{"commits.id", "commits.timestamp", "commits.repo", "commits.ref", "commits.author", "commits.message", "commits.merged_by"}
+	deployFields   = []string{"deploys.id", "deploys.timestamp", "deploys.repo", "deploys.ref", "deploys.namespace", "deploys.cluster", "deploys.image"}
 )
 
 func GetServiceByName(db *gorm.DB, name string) (*gorm.DB, models.Services) {
@@ -38,7 +47,7 @@ func CreateCommitEntry(db *gorm.DB, c []models.Commits) *gorm.DB {
 
 		// Add a timeline entry for this commit to the db
 		timeline := models.Timelines{CommitID: commit.ID, ServiceID: commit.ServiceID, Timestamp: commit.Timestamp}
-		db.Omit("DeployID", "Deploy").Create(&timeline)
+		db.Exec("INSERT INTO timelines (commit_id, service_id, timestamp) VALUES (?, ?, ?)", timeline.CommitID, timeline.ServiceID, timeline.Timestamp)
 	}
 
 	return db
@@ -108,8 +117,11 @@ func GetTimeline(db *gorm.DB, service models.Services) (*gorm.DB, []structs.Time
 
 	var timeline []structs.TimelineData
 
+	// Concatanate the timeline fields
+	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelineFields, ","), strings.Join(commitFields, ","), strings.Join(deployFields, ","))
+
 	// Joins the timeline table to the commits and deploys tables and into the TimelineData struct
-	result := db.Debug().Model(models.Timelines{}).Select("*").Joins("JOIN commits ON timelines.commit_id = commits.id").Where("timelines.service_id = ?", service.ID).Scan(&timeline)
+	result := db.Debug().Model(models.Timelines{}).Select(fields).Joins("LEFT JOIN commits ON timelines.commit_id = commits.id").Joins("LEFT JOIN deploys ON timelines.deploy_id = deploys.id").Where("timelines.service_id = ?", service.ID).Scan(&timeline)
 
 	return result, timeline
 }

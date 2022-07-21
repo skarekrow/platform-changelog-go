@@ -43,10 +43,10 @@ type Deploys struct {
  * A combination of the Commits and Deploys models
  */
 type Timelines struct {
-	ID        int       `gorm:"primary_key;autoincrement"`
-	ServiceID int       `gorm:"not null;foreign_key:services.id"`
-	CommitID  int       `gorm:"foreign_key:commits.id"`
-	DeployID  int       `gorm:"foreign_key:deploys.id"`
+	ID        int `gorm:"primary_key;autoincrement"`
+	ServiceID int `gorm:"not null;foreign_key:services.id"`
+	CommitID  int
+	DeployID  int
 	Timestamp time.Time `gorm:"not null"`
 	Commit    Commits
 	Deploy    Deploys

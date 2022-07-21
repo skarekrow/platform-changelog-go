@@ -25,14 +25,14 @@ func GetTimeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, timeline := db.GetTimeline(db.DB, service)
+	_, timeline := db.GetTimeline(db.DB, service)
 
-	if result.Error != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error producing the timeline"))
-		w.Write([]byte(result.Error.Error()))
-		return
-	}
+	// if result.Error != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	w.Write([]byte("Error producing the timeline"))
+	// 	w.Write([]byte(result.Error.Error()))
+	// 	return
+	// }
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
