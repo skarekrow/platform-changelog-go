@@ -121,7 +121,7 @@ func GetTimeline(db *gorm.DB, service models.Services) (*gorm.DB, []structs.Time
 	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelineFields, ","), strings.Join(commitFields, ","), strings.Join(deployFields, ","))
 
 	// Joins the timeline table to the commits and deploys tables and into the TimelineData struct
-	result := db.Model(models.Timelines{}).Select(fields).Joins("LEFT JOIN commits ON timelines.commit_id = commits.id").Joins("LEFT JOIN deploys ON timelines.deploy_id = deploys.id").Where("timelines.service_id = ?", service.ID).Scan(&timeline)
+	result := db.Model(models.Timelines{}).Select(fields).Joins("LEFT JOIN commits ON timelines.commit_id = commits.id").Joins("LEFT JOIN deploys ON timelines.deploy_id = deploys.id").Where("timelines.service_id = ?", service.ID).Order("timelines.Timestamp desc").Scan(&timeline)
 
 	return result, timeline
 }
