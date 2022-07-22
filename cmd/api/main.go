@@ -42,11 +42,18 @@ func main() {
 	sub.Post("/gitlab-webhook", endpoints.GitlabWebhook)
 
 	sub.Get("/services", endpoints.GetServicesAll)
+	sub.Get("/timelines", endpoints.GetTimelinesAll)
 	sub.Get("/commits", endpoints.GetCommitsAll)
 	sub.Get("/deploys", endpoints.GetDeploysAll)
-	sub.Get("/services/{service}", endpoints.GetAllByServiceName)
 
-	sub.Get("/services/{service}/timeline", endpoints.GetTimeline)
+	sub.Get("/services/{service}", endpoints.GetServiceByName)
+	sub.Get("/timelines/{service}", endpoints.GetTimelinesByService)
+	sub.Get("/services/{service}/commits", endpoints.GetCommitsByService)
+	sub.Get("/services/{service}/deploys", endpoints.GetDeploysByService)
+
+	sub.Get("/commits/{ref}", endpoints.GetCommitByRef)
+	sub.Get("/deploys/{ref}", endpoints.GetDeployByRef)
+	sub.Get("/timelines/{ref}", endpoints.GetTimelineByRef)
 
 	srv := http.Server{
 		Addr:    ":" + cfg.PublicPort,

@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	timelineFields = []string{"timelines.id", "timelines.timestamp", "timelines.service_id", "timelines.commit_id", "timelines.deploy_id"}
-	commitFields   = []string{"commits.id", "commits.timestamp", "commits.repo", "commits.ref", "commits.author", "commits.message", "commits.merged_by"}
-	deployFields   = []string{"deploys.id", "deploys.timestamp", "deploys.repo", "deploys.ref", "deploys.namespace", "deploys.cluster", "deploys.image"}
+	timelinesFields = []string{"timelines.id", "timelines.timestamp", "timelines.service_id", "timelines.ref", "timelines.repo", "timelines.type"}
+	commitsFields   = []string{"timelines.author", "timelines.message", "timelines.merged_by"}
+	deploysFields   = []string{"timelines.namespace", "timelines.cluster", "timelines.image"}
 )
 
 func GetServiceByName(db *gorm.DB, name string) (*gorm.DB, models.Services) {
@@ -38,16 +38,12 @@ func GetServiceByGHRepo(db *gorm.DB, service_url string) (*gorm.DB, models.Servi
 	return result, service
 }
 
-func CreateCommitEntry(db *gorm.DB, c []models.Commits) *gorm.DB {
+func CreateCommitEntry(db *gorm.DB, t []models.Timelines) *gorm.DB {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
 	defer callDurationTimer.ObserveDuration()
 
-	for _, commit := range c {
-		db.Create(&commit)
-
-		// Add a timeline entry for this commit to the db
-		timeline := models.Timelines{CommitID: commit.ID, ServiceID: commit.ServiceID, Timestamp: commit.Timestamp}
-		db.Exec("INSERT INTO timelines (commit_id, service_id, timestamp) VALUES (?, ?, ?)", timeline.CommitID, timeline.ServiceID, timeline.Timestamp)
+	for _, timeline := range t {
+		db.Create(&timeline)
 	}
 
 	return db
@@ -62,10 +58,9 @@ func GetAllByServiceName(db *gorm.DB, name string) (*gorm.DB, models.Services) {
 
 	l.Log.Debugf("Query name: %s", name)
 
-	// TODO: this should be one query that utilizes the structs defined in structs.go
 	db.Table("services").Select("*").Where("name = ?", name).First(&service)
-	result := db.Table("commits").Select("*").Joins("JOIN services ON commits.service_id = services.id").Where("services.name = ?", name).Order("Timestamp desc").Find(&service.Commits)
-	service.Deploys = []models.Deploys{}
+	result := db.Table("timelines").Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", name).Order("Timestamp desc").Find(&service.Timelines)
+
 	return result, service
 }
 
@@ -73,7 +68,7 @@ func GetLatest(db *gorm.DB, service models.Services) (*gorm.DB, models.Services)
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetAllByServiceName)
 	defer callDurationTimer.ObserveDuration()
 	l.Log.Debugf("Query name: %s", service.Name)
-	result := db.Table("commits").Select("*").Joins("JOIN services ON commits.service_id = services.id").Where("services.name = ?", service.Name).Order("Timestamp desc").Limit(1).Find(&service.Commits)
+	result := db.Table("timelines").Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "commit").Order("Timestamp desc").Limit(1).Find(&service.Timelines)
 	return result, service
 }
 
@@ -92,36 +87,93 @@ func GetServicesAll(db *gorm.DB) (*gorm.DB, []models.Services, []models.Services
 	return result, services, servicesWithCommits
 }
 
-func GetCommitsAll(db *gorm.DB) (*gorm.DB, []models.Commits) {
+func GetCommitsAll(db *gorm.DB) (*gorm.DB, []structs.TimelinesData) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsAll)
 	defer callDurationTimer.ObserveDuration()
-	var commits []models.Commits
-	result := db.Order("Timestamp desc").Find(&commits)
+	var commits []structs.TimelinesData
+	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.type = ?", "commit").Scan(&commits)
 	return result, commits
 }
 
-func GetDeploysAll(db *gorm.DB) (*gorm.DB, []models.Deploys) {
+func GetDeploysAll(db *gorm.DB) (*gorm.DB, []structs.TimelinesData) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysAll)
 	defer callDurationTimer.ObserveDuration()
-	var deploys []models.Deploys
-	result := db.Order("Timestamp desc").Find(&deploys)
+	var deploys []structs.TimelinesData
+	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.type = ?", "deploy").Scan(&deploys)
+	return result, deploys
+}
+
+func GetDeployByRef(db *gorm.DB, ref string) (*gorm.DB, structs.TimelinesData) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeployByRef)
+	defer callDurationTimer.ObserveDuration()
+	var deploy structs.TimelinesData
+	result := db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "deploy").Scan(&deploy)
+	return result, deploy
+}
+
+func GetCommitByRef(db *gorm.DB, ref string) (*gorm.DB, structs.TimelinesData) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitByRef)
+	defer callDurationTimer.ObserveDuration()
+	var commit structs.TimelinesData
+	result := db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "commit").Scan(&commit)
+	return result, commit
+}
+
+func GetCommitsByService(db *gorm.DB, service models.Services) (*gorm.DB, []structs.TimelinesData) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
+	defer callDurationTimer.ObserveDuration()
+	var commits []structs.TimelinesData
+	result := db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit").Scan(&commits)
+	return result, commits
+}
+
+func GetDeploysByService(db *gorm.DB, service models.Services) (*gorm.DB, []structs.TimelinesData) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysByService)
+	defer callDurationTimer.ObserveDuration()
+	var deploys []structs.TimelinesData
+	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "deploy").Scan(&deploys)
 	return result, deploys
 }
 
 /**
  * GetTimeline returns a timeline of commits and deploys for a service
  */
-func GetTimeline(db *gorm.DB, service models.Services) (*gorm.DB, []structs.TimelineData) {
-	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimeline)
+func GetTimelinesAll(db *gorm.DB) (*gorm.DB, []structs.TimelinesData) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesAll)
 	defer callDurationTimer.ObserveDuration()
 
-	var timeline []structs.TimelineData
+	var timelines []structs.TimelinesData
 
 	// Concatanate the timeline fields
-	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelineFields, ","), strings.Join(commitFields, ","), strings.Join(deployFields, ","))
+	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelinesFields, ","), strings.Join(commitsFields, ","), strings.Join(deploysFields, ","))
 
 	// Joins the timeline table to the commits and deploys tables and into the TimelineData struct
-	result := db.Model(models.Timelines{}).Select(fields).Joins("LEFT JOIN commits ON timelines.commit_id = commits.id").Joins("LEFT JOIN deploys ON timelines.deploy_id = deploys.id").Where("timelines.service_id = ?", service.ID).Order("timelines.Timestamp desc").Scan(&timeline)
+	result := db.Model(models.Timelines{}).Select(fields).Scan(&timelines)
+
+	return result, timelines
+}
+
+func GetTimelinesByService(db *gorm.DB, service models.Services) (*gorm.DB, []structs.TimelinesData) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesByService)
+	defer callDurationTimer.ObserveDuration()
+
+	var timelines []structs.TimelinesData
+
+	// Concatanate the timeline fields
+	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelinesFields, ","), strings.Join(commitsFields, ","), strings.Join(deploysFields, ","))
+
+	result := db.Model(models.Timelines{}).Select(fields).Where("service_id = ?", service.ID).Scan(&timelines)
+
+	return result, timelines
+}
+
+func GetTimelineByRef(db *gorm.DB, ref string) (*gorm.DB, structs.TimelinesData) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelineByRef)
+	defer callDurationTimer.ObserveDuration()
+
+	var timeline structs.TimelinesData
+
+	result := db.Model(models.Timelines{}).Select("*").Where("timelines.ref = ?", ref).Scan(&timeline)
 
 	return result, timeline
 }

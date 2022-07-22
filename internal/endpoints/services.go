@@ -27,7 +27,7 @@ func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetAllByServiceName(w http.ResponseWriter, r *http.Request) {
+func GetServiceByName(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	serviceName := chi.URLParam(r, "service")

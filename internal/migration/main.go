@@ -18,8 +18,6 @@ func main() {
 
 	db.DB.AutoMigrate(
 		&models.Services{},
-		&models.Commits{},
-		&models.Deploys{},
 		&models.Timelines{},
 	)
 

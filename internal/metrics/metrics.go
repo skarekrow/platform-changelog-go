@@ -54,9 +54,39 @@ var (
 		Help: "Elapsed time for sql creation of commit entry",
 	})
 
-	SqlGetTimeline = pa.NewHistogram(p.HistogramOpts{
-		Name: "platform_changelog_sql_get_timeline_seconds",
-		Help: "Elapsed time for sql lookup of timeline entry",
+	SqlGetCommitsByService = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_commits_by_service_seconds",
+		Help: "Elapsed time for sql lookup of commits by service",
+	})
+
+	SqlGetDeploysByService = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_deploys_by_service_seconds",
+		Help: "Elapsed time for sql lookup of deploys by service",
+	})
+
+	SqlGetCommitByRef = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_commit_by_ref_seconds",
+		Help: "Elapsed time for sql lookup of commit by ref",
+	})
+
+	SqlGetDeployByRef = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_deploy_by_ref_seconds",
+		Help: "Elapsed time for sql lookup of deploy by ref",
+	})
+
+	SqlGetTimelineByRef = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_timeline_by_ref_seconds",
+		Help: "Elapsed time for sql lookup of timeline by ref",
+	})
+
+	SqlGetTimelinesAll = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_timelines_all_seconds",
+		Help: "Elapsed time for sql lookup of timeline entries",
+	})
+
+	SqlGetTimelinesByService = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_timelines_by_service_seconds",
+		Help: "Elapsed time for sql lookup of a service's timeline entries",
 	})
 )
 
