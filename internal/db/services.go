@@ -37,17 +37,17 @@ func GetLatest(db *gorm.DB, service structs.ServicesData) (*gorm.DB, structs.Ser
 	return result, service
 }
 
-func GetServiceByName(db *gorm.DB, name string) (*gorm.DB, models.Services) {
+func GetServiceByName(db *gorm.DB, name string) (*gorm.DB, structs.ServicesData) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServiceByName)
 	defer callDurationTimer.ObserveDuration()
-	var service models.Services
-	result := db.Where("name = ?", name).First(&service)
+	var service structs.ServicesData
+	result := db.Model(models.Services{}).Where("name = ?", name).First(&service)
 	return result, service
 }
 
-func GetServiceByGHRepo(db *gorm.DB, service_url string) (*gorm.DB, models.Services) {
-	var service models.Services
-	result := db.Where("gh_repo = ?", service_url).First(&service)
+func GetServiceByGHRepo(db *gorm.DB, service_url string) (*gorm.DB, structs.ServicesData) {
+	var service structs.ServicesData
+	result := db.Model(models.Services{}).Where("gh_repo = ?", service_url).First(&service)
 
 	return result, service
 }

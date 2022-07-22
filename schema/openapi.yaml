@@ -2,7 +2,7 @@
 openapi: 3.0.3
 info:
   title: Platform Changelog API
-  description: Platform Changelog API provides change data
+  description: Platform Changelog API Provides Change Data for Monitored Services
   version: 1.0.0
 
 paths:
@@ -20,12 +20,12 @@ paths:
                 $ref: '#/components/schemas/ServicesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-          
-  /commits:
+  
+  /timelines:
     get:
-      summary: Returns an array of commits
-      description: Returns a list of all commits
-      operationId: api.commits
+      summary: Returns an array of timelines
+      description: Returns a list of all timelines
+      operationId: api.timelines
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
@@ -35,15 +35,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommitsData'
+                $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /timelines:
+  /commits:
     get:
-      summary: Returns an array of timelines
-      description: Returns a list of all timelines
-      operationId: api.timelines
+      summary: Returns an array of commits
+      description: Returns a list of all commits
+      operationId: api.commits
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
@@ -71,7 +71,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DeploysData'
+                $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
   
@@ -92,7 +92,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /timelines/{service}:
+  /services/{service}/timelines:
     get:
       summary: Returns all the commits and deploys for a specific service
       description: Returns an array containing timelines for a specific service
@@ -111,7 +111,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
           
-  /commits/{service}:
+  /services/{service}/commits:
     get:
       summary: Returns all the commits for a specific service
       description: Returns an array containing commits for a specific service
@@ -126,15 +126,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommitsData'
+                $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
 
   
-  /deploys/{service}:
+  /services/{service}/deploys:
     get:
-      summary: Returns all the commits for a specific service
-      description: Returns an array containing commits for a specific service
+      summary: Returns all the deploys for a specific service
+      description: Returns an array containing deploys for a specific service
       operationId: api.deploys.service
       parameters:
         - $ref: '#/components/parameters/service'
@@ -146,7 +146,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DeploysData'
+                $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -180,7 +180,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Commit'
+                $ref: '#/components/schemas/Timeline'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -197,7 +197,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Deploy'
+                $ref: '#/components/schemas/Timeline'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -212,16 +212,6 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Timeline'
-        
-    CommitsData:
-      type: array
-      items:
-        $ref: '#/components/schemas/Commit'
-      
-    DeploysData:
-      type: array
-      items:
-        $ref: '#/components/schemas/Deploy'
 
     Service:
       type: object
@@ -254,28 +244,18 @@ components:
         service:
           type: string
           description: Name of the service
-        ref:
-          type: string
-          description: Reference to the commit or deploy
-        message:
-          type: string
-          description: Commit message
-      
-    Commit:
-      type: object
-      properties:
-        service:
-          type: string
-          description: Name of the service
         repo:
           type: string
-          description: Repo name
+          description: Github repo url
         ref:
           type: string
-          description: Git commit reference
+          description: Reference to the Git commit or deploy
         timestamp:
           type: string
-          description: Timestamp of the commit
+          description: Timestamp of the commit or deploy
+        type:
+          type: string
+          description: Type of event (commit or deploy)
         author:
           type: string
           description: Author of the commit
@@ -285,19 +265,6 @@ components:
         message:
           type: string
           description: Git commit message
-        url:
-          type: string
-          description: Link to the merged PR
-      
-    Deploy:
-      type: object
-      properties:
-        service:
-          type: string
-          description: Name of the service
-        ref:
-          type: string
-          description: Commit reference for deploy
         namespace:
           type: string
           description: Namespace the app deployed into
@@ -307,12 +274,9 @@ components:
         image:
           type: string
           description: The image tag that was deployed
-        timestamp:
-          type: string
-          description: Timestamp of the deploy
         url:
           type: string
-          description: Link to the tekton pipeline job
+          description: Link to the merged PR
   
     Error:
       type: object

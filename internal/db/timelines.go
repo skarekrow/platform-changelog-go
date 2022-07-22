@@ -29,7 +29,7 @@ func GetTimelinesAll(db *gorm.DB) (*gorm.DB, []structs.TimelinesData) {
 	return result, timelines
 }
 
-func GetTimelinesByService(db *gorm.DB, service models.Services) (*gorm.DB, []structs.TimelinesData) {
+func GetTimelinesByService(db *gorm.DB, service structs.ServicesData) (*gorm.DB, []structs.TimelinesData) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesByService)
 	defer callDurationTimer.ObserveDuration()
 

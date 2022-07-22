@@ -16,24 +16,24 @@ type Services struct {
 	Timelines   []Timelines `gorm:"foreignkey:ID"`
 }
 
-// type timelineType string
+type timelineType string
 
-// const (
-// 	commit timelineType = "commit"
-// 	deploy timelineType = "deploy"
-// )
+const (
+	commit timelineType = "commit"
+	deploy timelineType = "deploy"
+)
 
 type Timelines struct {
-	ID        int       `gorm:"primary_key;autoincrement"`
-	ServiceID int       `gorm:"not null;foreign_key:services.id"`
-	Timestamp time.Time `gorm:"not null"`
-	Type      string    `gorm:"not null"`
-	Ref       string    `gorm:"not null"`
-	Repo      string    `gorm:"not null"`
-	Author    string
-	MergedBy  string
-	Message   string
-	Namespace string
-	Cluster   string
-	Image     string
+	ID              int          `gorm:"primary_key;autoincrement"`
+	ServiceID       int          `gorm:"not null;foreign_key:services.id"`
+	Timestamp       time.Time    `gorm:"not null"`
+	Type            timelineType `gorm:"not null" sql:"type:timeline_type"`
+	Ref             string       `gorm:"not null"`
+	Repo            string       `gorm:"not null"`
+	Author          string
+	MergedBy        string
+	Message         string
+	DeployNamespace string
+	Cluster         string
+	Image           string
 }

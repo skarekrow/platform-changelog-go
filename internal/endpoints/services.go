@@ -33,9 +33,6 @@ func GetServiceByName(w http.ResponseWriter, r *http.Request) {
 	serviceName := chi.URLParam(r, "service")
 	result, service := db.GetServiceByName(db.DB, serviceName)
 
-	/**
-	 * Couldn't get the commits table
-	 */
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -50,6 +47,7 @@ func GetServiceByName(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Service not found"))
 		return
 	}
+
 	l.Log.Debugf("URL Param: %s", serviceName)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)

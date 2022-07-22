@@ -16,7 +16,7 @@ func GetDeploysAll(db *gorm.DB) (*gorm.DB, []structs.TimelinesData) {
 	return result, deploys
 }
 
-func GetDeploysByService(db *gorm.DB, service models.Services) (*gorm.DB, []structs.TimelinesData) {
+func GetDeploysByService(db *gorm.DB, service structs.ServicesData) (*gorm.DB, []structs.TimelinesData) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysByService)
 	defer callDurationTimer.ObserveDuration()
 	var deploys []structs.TimelinesData

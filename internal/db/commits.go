@@ -35,7 +35,7 @@ func GetCommitByRef(db *gorm.DB, ref string) (*gorm.DB, structs.TimelinesData) {
 	return result, commit
 }
 
-func GetCommitsByService(db *gorm.DB, service models.Services) (*gorm.DB, []structs.TimelinesData) {
+func GetCommitsByService(db *gorm.DB, service structs.ServicesData) (*gorm.DB, []structs.TimelinesData) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
 	defer callDurationTimer.ObserveDuration()
 	var commits []structs.TimelinesData
