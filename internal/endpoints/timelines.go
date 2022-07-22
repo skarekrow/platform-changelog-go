@@ -66,6 +66,12 @@ func GetTimelineByRef(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if result.RowsAffected == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Timeline not found"))
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(timeline)

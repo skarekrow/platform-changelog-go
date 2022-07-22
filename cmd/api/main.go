@@ -38,6 +38,7 @@ func main() {
 	mr.Get("/", lubdub)
 	mr.Get("/healthz", lubdub)
 	mr.Handle("/metrics", promhttp.Handler())
+
 	sub.Post("/github-webhook", endpoints.GithubWebhook)
 	sub.Post("/gitlab-webhook", endpoints.GitlabWebhook)
 
@@ -47,13 +48,13 @@ func main() {
 	sub.Get("/deploys", endpoints.GetDeploysAll)
 
 	sub.Get("/services/{service}", endpoints.GetServiceByName)
-	sub.Get("/timelines/{service}", endpoints.GetTimelinesByService)
+	sub.Get("/services/{service}/timelines", endpoints.GetTimelinesByService)
 	sub.Get("/services/{service}/commits", endpoints.GetCommitsByService)
 	sub.Get("/services/{service}/deploys", endpoints.GetDeploysByService)
 
+	sub.Get("/timelines/{ref}", endpoints.GetTimelineByRef)
 	sub.Get("/commits/{ref}", endpoints.GetCommitByRef)
 	sub.Get("/deploys/{ref}", endpoints.GetDeployByRef)
-	sub.Get("/timelines/{ref}", endpoints.GetTimelineByRef)
 
 	srv := http.Server{
 		Addr:    ":" + cfg.PublicPort,

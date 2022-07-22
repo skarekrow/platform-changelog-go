@@ -9,20 +9,20 @@ type ServicesData struct {
 	DeployFile  string          `json:"deploy_file,omitempty"`
 	Namespace   string          `json:"namespace,omitempty"`
 	Branch      string          `json:"branch,omitempty"`
-	Timeline    []TimelinesData `json:"commits,omitempty"`
+	Timelines   []TimelinesData `json:"commits,omitempty" gorm:"foreignkey:ID"`
 }
 
 type TimelinesData struct {
-	ID        int    `json:"id"`
-	ServiceID int    `json:"service_id"`
-	Type      string `json:"type"`
-	Timestamp string `json:"timestamp"`
-	Repo      string `json:"repo"`
-	Ref       string `json:"ref"`
-	Author    string `json:"author,omitempty"`
-	MergedBy  string `json:"merged_by,omitempty"`
-	Message   string `json:"message,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
-	Cluster   string `json:"cluster,omitempty"`
-	Image     string `json:"image,omitempty"`
+	ID              int    `json:"id" gorm:"primary_key"`
+	ServiceID       int    `json:"service_id" gorm:"not null;foreign_key:services_data.id"`
+	Type            string `json:"type"`
+	Timestamp       string `json:"timestamp"`
+	Repo            string `json:"repo"`
+	Ref             string `json:"ref"`
+	Author          string `json:"author,omitempty"`
+	MergedBy        string `json:"merged_by,omitempty"`
+	Message         string `json:"message,omitempty"`
+	DeployNamespace string `json:"namespace,omitempty"`
+	Cluster         string `json:"cluster,omitempty"`
+	Image           string `json:"image,omitempty"`
 }

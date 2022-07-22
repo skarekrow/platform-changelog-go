@@ -13,7 +13,7 @@ import (
 func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	result, _, servicesWithCommits := db.GetServicesAll(db.DB)
+	result, servicesWithTimelines := db.GetServicesAll(db.DB)
 	if result.Error != nil {
 
 		w.WriteHeader(http.StatusInternalServerError)
@@ -23,7 +23,7 @@ func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 
-	json.NewEncoder(w).Encode(servicesWithCommits)
+	json.NewEncoder(w).Encode(servicesWithTimelines)
 
 }
 
@@ -31,7 +31,7 @@ func GetServiceByName(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	serviceName := chi.URLParam(r, "service")
-	result, service := db.GetAllByServiceName(db.DB, serviceName)
+	result, service := db.GetServiceByName(db.DB, serviceName)
 
 	/**
 	 * Couldn't get the commits table

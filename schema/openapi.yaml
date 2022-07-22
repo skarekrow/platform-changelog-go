@@ -21,7 +21,6 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
           
-                    
   /commits:
     get:
       summary: Returns an array of commits
@@ -37,6 +36,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommitsData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /timelines:
+    get:
+      summary: Returns an array of timelines
+      description: Returns a list of all timelines
+      operationId: api.timelines
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -72,6 +89,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Service'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /timelines/{service}:
+    get:
+      summary: Returns all the commits and deploys for a specific service
+      description: Returns an array containing timelines for a specific service
+      operationId: api.timelines.service
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicesData'
         '400':
           $ref: '#/components/responses/BadRequest'
           
@@ -114,7 +150,23 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  
+  /timelines/{ref}:
+    get:
+      summary: Get data on a particular commit or deploy
+      description: Get data on a particular timelines
+      operationId: api.timelines.ref
+      parameters:
+        - $ref: '#/components/parameters/ref'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinesData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
   /commits/{ref}:
     get:
       summary: Get data on a particular commit
@@ -132,6 +184,22 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
+  /deploys/{ref}:
+    get:
+      summary: Get data on a particular deploy
+      description: Get data on a particular deploy
+      operationId: api.deploys.ref
+      parameters:
+        - $ref: '#/components/parameters/ref'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deploy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
 
 components:
   schemas:
@@ -139,6 +207,11 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Service'
+
+    TimelinesData:
+      type: array
+      items:
+        $ref: '#/components/schemas/Timeline'
         
     CommitsData:
       type: array
@@ -175,7 +248,19 @@ components:
           type: string
           description: monitored branch
 
-          
+    Timeline:
+      type: object
+      properties:
+        service:
+          type: string
+          description: Name of the service
+        ref:
+          type: string
+          description: Reference to the commit or deploy
+        message:
+          type: string
+          description: Commit message
+      
     Commit:
       type: object
       properties:
