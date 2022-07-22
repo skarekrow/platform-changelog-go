@@ -1,43 +1,284 @@
 ---
 openapi: 3.0.3
 info:
-  title: Platform Changlog
-  description: Platform Changelog is a searchable database of all platform changes
-  version: 0.1.0
-  contact:
-    email: sadams@redhat.com
+  title: Platform Changelog API
+  description: Platform Changelog API provides change data
+  version: 1.0.0
 
 paths:
-  /api/platform-changelog/v1/status:
+  /services:
     get:
-      description: get the status of the service
-      operationId: get.status
+      summary: Returns list of registered services
+      description: Returns a list of services that have been registered with the changelog
+      operationId: api.services
       responses:
-       '200':
+        '200':
           description: OK
           content:
-           application/json:
-             schema:
-               $ref: '#/components/schemas/Status'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicesData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+          
+                    
+  /commits:
+    get:
+      summary: Returns an array of commits
+      description: Returns a list of all commits
+      operationId: api.commits
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitsData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
 
-  /api/platform-changelog/v1/github-webhook:
-    post:
-      description: receive a webhook from github
+  /deploys:
+    get:
+      summary: Returns an array of deploys
+      description: Returns a list of all deploys
+      operationId: api.deploys
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
-       '200':
+        '200':
           description: OK
           content:
-           application/json:
-             schema:
-               $ref: '#/components/schemas/GithubWebhook'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploysData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  
+  /services/{service}:
+    get:
+      summary: Returns an individual service
+      description: returns an individual service
+      operationId: api.services.service
+      parameters:
+        - $ref: '#/components/parameters/service'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+          
+  /commits/{service}:
+    get:
+      summary: Returns all the commits for a specific service
+      description: Returns an array containing commits for a specific service
+      operationId: api.commits.service
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitsData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  
+  /deploys/{service}:
+    get:
+      summary: Returns all the commits for a specific service
+      description: Returns an array containing commits for a specific service
+      operationId: api.deploys.service
+      parameters:
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploysData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  
+  /commits/{ref}:
+    get:
+      summary: Get data on a particular commit
+      description: Get data on a particular commit
+      operationId: api.commits.ref
+      parameters:
+        - $ref: '#/components/parameters/ref'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commit'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
 
 components:
   schemas:
-   /api/platform-changelog/v1/status:
-     type: object
-     properties:
-      status:
-        type: string
-        description: The status of the service
-        example: OK
+    ServicesData:
+      type: array
+      items:
+        $ref: '#/components/schemas/Service'
+        
+    CommitsData:
+      type: array
+      items:
+        $ref: '#/components/schemas/Commit'
       
+    DeploysData:
+      type: array
+      items:
+        $ref: '#/components/schemas/Deploy'
+
+    Service:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the service
+        display_name:
+          type: string
+          description: Preferred name
+        gh_repo:
+          type: string
+          description: Github repo url
+        gl_repo:
+          type: string
+          description: Gitlab repo url
+        deploy_file:
+          type: string
+          description: Link to app interface deploy resource
+        namespace:
+          type: string
+          description: Namespace the app is deployed in openshift
+        branch:
+          type: string
+          description: monitored branch
+
+          
+    Commit:
+      type: object
+      properties:
+        service:
+          type: string
+          description: Name of the service
+        repo:
+          type: string
+          description: Repo name
+        ref:
+          type: string
+          description: Git commit reference
+        timestamp:
+          type: string
+          description: Timestamp of the commit
+        author:
+          type: string
+          description: Author of the commit
+        merged_by:
+          type: string
+          description: User that merged the pull request
+        message:
+          type: string
+          description: Git commit message
+        url:
+          type: string
+          description: Link to the merged PR
+      
+    Deploy:
+      type: object
+      properties:
+        service:
+          type: string
+          description: Name of the service
+        ref:
+          type: string
+          description: Commit reference for deploy
+        namespace:
+          type: string
+          description: Namespace the app deployed into
+        clusteer:
+          type: string
+          description: The cluster the app deployed into
+        image:
+          type: string
+          description: The image tag that was deployed
+        timestamp:
+          type: string
+          description: Timestamp of the deploy
+        url:
+          type: string
+          description: Link to the tekton pipeline job
+  
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+      required:
+      - message
+
+  parameters:
+    service:
+      in: path
+      name: service
+      required: true
+      schema:
+        type: string
+      description: The service name
+    
+    ref:
+      in: path
+      name: ref
+      required: true
+      schema:
+        type: string
+      description: The commit reference
+      
+    offsetParam:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: The number of items to skip before starting to collect the result set.
+      
+    limitParam:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+      description: The number of items to return.
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
