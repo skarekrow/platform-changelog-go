@@ -29,7 +29,7 @@ type TimelinesData struct {
 	ServiceID       int    `json:"service_id" gorm:"foreign_key:services_data.id"`
 	Type            string `json:"type"`
 	Repo            string `json:"repo"`
-	Ref             string `json:"ref"`
+	Ref             string `json:"ref,omitempty"`
 	Timestamp       string `json:"timestamp"`
 	Author          string `json:"author,omitempty"`
 	MergedBy        string `json:"merged_by,omitempty"`
@@ -37,4 +37,6 @@ type TimelinesData struct {
 	DeployNamespace string `json:"namespace,omitempty"`
 	Cluster         string `json:"cluster,omitempty"`
 	Image           string `json:"image,omitempty"`
+	TriggeredBy     string `json:"triggered_by,omitempty"`
+	Status          string `json:"status,omitempty"`
 }

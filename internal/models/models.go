@@ -28,12 +28,14 @@ type Timelines struct {
 	ServiceID       int          `gorm:"not null;foreign_key:services.id"`
 	Timestamp       time.Time    `gorm:"not null"`
 	Type            timelineType `gorm:"not null" sql:"type:timeline_type"`
-	Ref             string       `gorm:"not null"`
 	Repo            string       `gorm:"not null"`
+	Ref             string
 	Author          string
 	MergedBy        string
 	Message         string
 	DeployNamespace string
 	Cluster         string
 	Image           string
+	TriggeredBy     string
+	Status          string
 }
