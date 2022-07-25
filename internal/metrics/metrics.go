@@ -29,9 +29,9 @@ var (
 		Help: "Total number of response codes",
 	}, []string{"code"})
 
-	SqlGetCommitsAll = pa.NewHistogram(p.HistogramOpts{
-		Name:    "platform_changelog_sql_get_commits_all_seconds",
-		Help:    "Elapsed time for sql lookup of all commits",
+	SqlCreateCommitEntry = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_create_commit_entry_seconds",
+		Help: "Elapsed time for sql creation of commit entry",
 	})
 
 	SqlGetServicesAll = pa.NewHistogram(p.HistogramOpts{
@@ -39,9 +39,14 @@ var (
 		Help: "Elapsed time for sql lookup of all services",
 	})
 
-	SqlGetAllByServiceName = pa.NewHistogram(p.HistogramOpts{
-		Name: "platform_changelog_sql_get_all_by_service_name_seconds",
-		Help: "Elapsed time for sql lookup of services by name",
+	SqlGetTimelinesAll = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_timelines_all_seconds",
+		Help: "Elapsed time for sql lookup of timeline entries",
+	})
+
+	SqlGetCommitsAll = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_commits_all_seconds",
+		Help: "Elapsed time for sql lookup of all commits",
 	})
 
 	SqlGetDeploysAll = pa.NewHistogram(p.HistogramOpts{
@@ -49,14 +54,44 @@ var (
 		Help: "Elapsed time for sql lookup of all deploys",
 	})
 
-	SqlCreateCommitEntry = pa.NewHistogram(p.HistogramOpts{
-		Name: "platform_changelog_sql_create_commit_entry_seconds",
-		Help: "Elapsed time for sql creation of commit entry",
+	SqlGetServiceByName = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_service_by_name_seconds",
+		Help: "Elapsed time for sql lookup of services by name",
+	})
+
+	SqlGetCommitsByService = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_commits_by_service_seconds",
+		Help: "Elapsed time for sql lookup of commits by service",
+	})
+
+	SqlGetDeploysByService = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_deploys_by_service_seconds",
+		Help: "Elapsed time for sql lookup of deploys by service",
+	})
+
+	SqlGetTimelinesByService = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_timelines_by_service_seconds",
+		Help: "Elapsed time for sql lookup of a service's timeline entries",
+	})
+
+	SqlGetCommitByRef = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_commit_by_ref_seconds",
+		Help: "Elapsed time for sql lookup of commit by ref",
+	})
+
+	SqlGetDeployByRef = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_deploy_by_ref_seconds",
+		Help: "Elapsed time for sql lookup of deploy by ref",
+	})
+
+	SqlGetTimelineByRef = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_timeline_by_ref_seconds",
+		Help: "Elapsed time for sql lookup of timeline by ref",
 	})
 )
 
 type MetricsTrackingResponseWriter struct {
-	Wrapped http.ResponseWriter
+	Wrapped   http.ResponseWriter
 	UserAgent string
 }
 
@@ -88,7 +123,7 @@ func (m *MetricsTrackingResponseWriter) Write(b []byte) (int, error) {
 func ResponseMetricsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mw := &MetricsTrackingResponseWriter{
-			Wrapped: w,
+			Wrapped:   w,
 			UserAgent: r.Header.Get("User-Agent"),
 		}
 		next.ServeHTTP(mw, r)

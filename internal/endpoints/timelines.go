@@ -9,62 +9,70 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 )
 
-func GetCommitsAll(w http.ResponseWriter, r *http.Request) {
+func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	result, commits := db.GetCommitsAll(db.DB)
+	result, timeline := db.GetTimelinesAll(db.DB)
+
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		w.Write([]byte("Error producing the timeline"))
+		w.Write([]byte(result.Error.Error()))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(commits)
+	json.NewEncoder(w).Encode(timeline)
 }
 
-func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
+func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
+
 	serviceName := chi.URLParam(r, "service")
 
 	result, service := db.GetServiceByName(db.DB, serviceName)
+
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Couldn't find the service"))
 		return
 	}
 
-	result, commits := db.GetCommitsByService(db.DB, service)
+	result, timeline := db.GetTimelinesByService(db.DB, service)
+
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		w.Write([]byte("Error producing the timeline"))
+		w.Write([]byte(result.Error.Error()))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(commits)
+	json.NewEncoder(w).Encode(timeline)
 }
 
-func GetCommitByRef(w http.ResponseWriter, r *http.Request) {
+func GetTimelineByRef(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	ref := chi.URLParam(r, "ref")
 
-	result, commit := db.GetCommitByRef(db.DB, ref)
+	result, timeline := db.GetTimelineByRef(db.DB, ref)
+
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		w.Write([]byte("Error producing the timeline"))
+		w.Write([]byte(result.Error.Error()))
 		return
 	}
 
 	if result.RowsAffected == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Commit not found"))
+		w.Write([]byte("Timeline not found"))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(commit)
+	json.NewEncoder(w).Encode(timeline)
 }

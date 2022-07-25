@@ -11,6 +11,7 @@ import (
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	m "github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 	"github.com/redhatinsights/platform-changelog-go/internal/utils"
 )
 
@@ -81,13 +82,14 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getCommitData(g *github.PushEvent, s m.Services) []m.Commits {
-	var commits []m.Commits
+func getCommitData(g *github.PushEvent, s structs.ServicesData) []m.Timelines {
+	var commits []m.Timelines
 	for _, commit := range g.Commits {
-		record := m.Commits{
+		record := m.Timelines{
 			ServiceID: s.ID,
 			Repo:      utils.DerefString(g.GetRepo().Name),
 			Ref:       commit.GetID(),
+			Type:      "commit",
 			Timestamp: commit.Timestamp.Time,
 			Author:    utils.DerefString(commit.GetAuthor().Login),
 			MergedBy:  g.Pusher.GetName(),

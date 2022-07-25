@@ -5,35 +5,37 @@ import (
 )
 
 type Services struct {
-	ID          int    `gorm:"primary_key"`
-	Name		string `gorm:"not null"`
+	ID          int    `gorm:"primary_key;autoincremement"`
+	Name        string `gorm:"not null"`
 	DisplayName string `gorm:"not null;unique"`
 	GHRepo      string
 	GLRepo      string
 	DeployFile  string
 	Namespace   string
-	Branch      string `gorm:"default:'master'"`
-	Commits     []Commits `gorm:"foreignkey:ID"`
-	Deploys     []Deploys `gorm:"foreignkey:ID"`
+	Branch      string      `gorm:"default:'master'"`
+	Timelines   []Timelines `gorm:"foreignkey:ID"`
 }
 
-type Commits struct {
-	ID        int       `gorm:"primary_key;autoincrement"`
-	ServiceID int       `gorm:"not null;foreign_key:services.id"`
-	Repo      string    `gorm:"not null"`
-	Ref       string    `gorm:"not null"`
-	Timestamp time.Time `gorm:"not null"`
-	Author    string    `gorm:"not null"`
-	MergedBy  string
-	Message   string
-}
+type timelineType string
 
-type Deploys struct {
-	ID        int       `gorm:"primary_key"`
-	ServiceID int       `gorm:"not null;foreign_key:services.id"`
-	Ref       string    `gorm:"not null"`
-	Namespace string    `gorm:"not null"`
-	Cluster   string    `gorm:"not null"`
-	Image     string    `gorm:"not null"`
-	Timestamp time.Time `gorm:"not null"`
+const (
+	commit timelineType = "commit"
+	deploy timelineType = "deploy"
+)
+
+type Timelines struct {
+	ID              int          `gorm:"primary_key;autoincrement"`
+	ServiceID       int          `gorm:"not null;foreign_key:services.id"`
+	Timestamp       time.Time    `gorm:"not null"`
+	Type            timelineType `gorm:"not null" sql:"type:timeline_type"`
+	Repo            string       `gorm:"not null"`
+	Ref             string
+	Author          string
+	MergedBy        string
+	Message         string
+	DeployNamespace string
+	Cluster         string
+	Image           string
+	TriggeredBy     string
+	Status          string
 }

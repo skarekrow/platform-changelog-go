@@ -16,10 +16,12 @@ func main() {
 
 	db.DbConnect(cfg)
 
+	// Set up TimelineType Enum (gorm doesn't have a function for this)
+	db.DB.Exec("CREATE TYPE timeline_type AS ENUM ('unknown', 'commit', 'deploy')")
+
 	db.DB.AutoMigrate(
 		&models.Services{},
-		&models.Commits{},
-		&models.Deploys{},
+		&models.Timelines{},
 	)
 
 	logging.Log.Info("DB Migration Complete")
