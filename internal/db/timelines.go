@@ -24,7 +24,7 @@ func GetTimelinesAll(db *gorm.DB) (*gorm.DB, []structs.TimelinesData) {
 	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelinesFields, ","), strings.Join(commitsFields, ","), strings.Join(deploysFields, ","))
 
 	// Joins the timeline table to the commits and deploys tables and into the TimelineData struct
-	result := db.Model(models.Timelines{}).Select(fields).Scan(&timelines)
+	result := db.Model(models.Timelines{}).Select(fields).Order("Timestamp desc").Scan(&timelines)
 
 	return result, timelines
 }
@@ -38,7 +38,7 @@ func GetTimelinesByService(db *gorm.DB, service structs.ServicesData) (*gorm.DB,
 	// Concatanate the timeline fields
 	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelinesFields, ","), strings.Join(commitsFields, ","), strings.Join(deploysFields, ","))
 
-	result := db.Model(models.Timelines{}).Select(fields).Where("service_id = ?", service.ID).Scan(&timelines)
+	result := db.Model(models.Timelines{}).Select(fields).Where("service_id = ?", service.ID).Order("Timestamp desc").Scan(&timelines)
 
 	return result, timelines
 }

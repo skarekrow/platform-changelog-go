@@ -23,7 +23,7 @@ func GetCommitsAll(db *gorm.DB) (*gorm.DB, []structs.TimelinesData) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsAll)
 	defer callDurationTimer.ObserveDuration()
 	var commits []structs.TimelinesData
-	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.type = ?", "commit").Scan(&commits)
+	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.type = ?", "commit").Order("Timestamp desc").Scan(&commits)
 	return result, commits
 }
 
@@ -39,6 +39,6 @@ func GetCommitsByService(db *gorm.DB, service structs.ServicesData) (*gorm.DB, [
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
 	defer callDurationTimer.ObserveDuration()
 	var commits []structs.TimelinesData
-	result := db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit").Scan(&commits)
+	result := db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit").Order("Timestamp desc").Scan(&commits)
 	return result, commits
 }

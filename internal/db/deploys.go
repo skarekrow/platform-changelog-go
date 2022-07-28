@@ -12,7 +12,7 @@ func GetDeploysAll(db *gorm.DB) (*gorm.DB, []structs.TimelinesData) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysAll)
 	defer callDurationTimer.ObserveDuration()
 	var deploys []structs.TimelinesData
-	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.type = ?", "deploy").Scan(&deploys)
+	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.type = ?", "deploy").Order("Timestamp desc").Scan(&deploys)
 	return result, deploys
 }
 
@@ -20,7 +20,7 @@ func GetDeploysByService(db *gorm.DB, service structs.ServicesData) (*gorm.DB, [
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysByService)
 	defer callDurationTimer.ObserveDuration()
 	var deploys []structs.TimelinesData
-	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "deploy").Scan(&deploys)
+	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.service_id = ?", service.ID).Order("Timestamp desc").Where("timelines.type = ?", "deploy").Scan(&deploys)
 	return result, deploys
 }
 
