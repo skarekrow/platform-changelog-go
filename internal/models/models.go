@@ -13,7 +13,7 @@ type Services struct {
 	DeployFile  string
 	Namespace   string
 	Branch      string      `gorm:"default:'master'"`
-	Timelines   []Timelines `gorm:"foreignkey:ID"`
+	Timelines   []Timelines `gorm:"foreignkey:ServiceID"`
 }
 
 type timelineType string
