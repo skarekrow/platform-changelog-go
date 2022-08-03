@@ -19,11 +19,19 @@ func CreateCommitEntry(db *gorm.DB, t []models.Timelines) *gorm.DB {
 	return db
 }
 
-func GetCommitsAll(db *gorm.DB) (*gorm.DB, []structs.TimelinesData) {
+func GetCommitsAll(db *gorm.DB, page int, limit int) (*gorm.DB, []structs.TimelinesData) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsAll)
 	defer callDurationTimer.ObserveDuration()
 	var commits []structs.TimelinesData
-	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.type = ?", "commit").Order("Timestamp desc").Scan(&commits)
+	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.type = ?", "commit").Order("Timestamp desc").Limit(limit).Offset(page * limit).Scan(&commits)
+	return result, commits
+}
+
+func GetCommitsByService(db *gorm.DB, service structs.ServicesData, page int, limit int) (*gorm.DB, []structs.TimelinesData) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
+	defer callDurationTimer.ObserveDuration()
+	var commits []structs.TimelinesData
+	result := db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit").Order("Timestamp desc").Limit(limit).Offset(page * limit).Scan(&commits)
 	return result, commits
 }
 
@@ -33,12 +41,4 @@ func GetCommitByRef(db *gorm.DB, ref string) (*gorm.DB, structs.TimelinesData) {
 	var commit structs.TimelinesData
 	result := db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "commit").Scan(&commit)
 	return result, commit
-}
-
-func GetCommitsByService(db *gorm.DB, service structs.ServicesData) (*gorm.DB, []structs.TimelinesData) {
-	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
-	defer callDurationTimer.ObserveDuration()
-	var commits []structs.TimelinesData
-	result := db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit").Order("Timestamp desc").Scan(&commits)
-	return result, commits
 }

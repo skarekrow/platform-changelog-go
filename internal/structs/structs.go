@@ -1,5 +1,10 @@
 package structs
 
+type Query struct {
+	Page  int
+	Limit int
+}
+
 type ServicesData struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`

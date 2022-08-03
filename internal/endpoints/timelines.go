@@ -12,7 +12,14 @@ import (
 func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	result, timeline := db.GetTimelinesAll(db.DB)
+	q, err := initQuery(r)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, "Invalid query")
+		return
+	}
+
+	result, timeline := db.GetTimelinesAll(db.DB, q.Page, q.Limit)
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -31,6 +38,13 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 
 	serviceName := chi.URLParam(r, "service")
 
+	q, err := initQuery(r)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, "Invalid query")
+		return
+	}
+
 	result, service := db.GetServiceByName(db.DB, serviceName)
 
 	if result.Error != nil {
@@ -39,7 +53,7 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, timeline := db.GetTimelinesByService(db.DB, service)
+	result, timeline := db.GetTimelinesByService(db.DB, service, q.Page, q.Limit)
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)

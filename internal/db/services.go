@@ -16,11 +16,13 @@ func CreateServiceTableEntry(db *gorm.DB, name string, s config.Service) (result
 	return results, newService
 }
 
-func GetServicesAll(db *gorm.DB) (*gorm.DB, []structs.ExpandedServicesData) {
+func GetServicesAll(db *gorm.DB, page int, limit int) (*gorm.DB, []structs.ExpandedServicesData) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServicesAll)
 	defer callDurationTimer.ObserveDuration()
+
 	var services []structs.ExpandedServicesData
-	result := db.Model(models.Services{}).Find(&services)
+
+	result := db.Model(models.Services{}).Limit(limit).Offset(page * limit).Find(&services)
 
 	var servicesWithTimelines []structs.ExpandedServicesData
 	for i := 0; i < len(services); i++ {

@@ -12,7 +12,14 @@ import (
 func GetCommitsAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	result, commits := db.GetCommitsAll(db.DB)
+	q, err := initQuery(r)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, "Invalid query")
+		return
+	}
+
+	result, commits := db.GetCommitsAll(db.DB, q.Page, q.Limit)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -28,6 +35,13 @@ func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	serviceName := chi.URLParam(r, "service")
 
+	q, err := initQuery(r)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, "Invalid query")
+		return
+	}
+
 	result, service := db.GetServiceByName(db.DB, serviceName)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -35,7 +49,7 @@ func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, commits := db.GetCommitsByService(db.DB, service)
+	result, commits := db.GetCommitsByService(db.DB, service, q.Page, q.Limit)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
