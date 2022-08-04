@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
 func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +20,7 @@ func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, timeline := db.GetTimelinesAll(db.DB, q.Page, q.Limit)
+	result, timeline, count := db.GetTimelinesAll(db.DB, q.Page, q.Limit)
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -28,9 +29,11 @@ func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	timelinesList := structs.TimelinesList{count, timeline}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(timeline)
+	json.NewEncoder(w).Encode(timelinesList)
 }
 
 func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +56,7 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, timeline := db.GetTimelinesByService(db.DB, service, q.Page, q.Limit)
+	result, timeline, count := db.GetTimelinesByService(db.DB, service, q.Page, q.Limit)
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -62,9 +65,11 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	timelinesList := structs.TimelinesList{count, timeline}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(timeline)
+	json.NewEncoder(w).Encode(timelinesList)
 }
 
 func GetTimelineByRef(w http.ResponseWriter, r *http.Request) {

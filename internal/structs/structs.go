@@ -4,6 +4,20 @@ type Query struct {
 	Page  int
 	Limit int
 }
+type ServicesList struct {
+	Count    int64          `json:"count"`
+	Services []ServicesData `json:"services"`
+}
+
+type ExpandedServicesList struct {
+	Count    int64                  `json:"count"`
+	Services []ExpandedServicesData `json:"services"`
+}
+
+type TimelinesList struct {
+	Count     int64           `json:"count"`
+	Timelines []TimelinesData `json:"timelines"`
+}
 
 type ServicesData struct {
 	ID          int    `json:"id"`

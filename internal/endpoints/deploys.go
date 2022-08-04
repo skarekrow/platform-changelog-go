@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
 func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
@@ -19,16 +20,18 @@ func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, deploys := db.GetDeploysAll(db.DB, q.Page, q.Limit)
+	result, deploys, count := db.GetDeploysAll(db.DB, q.Page, q.Limit)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
+	deploysList := structs.TimelinesList{count, deploys}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(deploys)
+	json.NewEncoder(w).Encode(deploysList)
 }
 
 func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
@@ -49,16 +52,18 @@ func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, deploys := db.GetDeploysByService(db.DB, service, q.Page, q.Limit)
+	result, deploys, count := db.GetDeploysByService(db.DB, service, q.Page, q.Limit)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
+	deploysList := structs.TimelinesList{count, deploys}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(deploys)
+	json.NewEncoder(w).Encode(deploysList)
 }
 
 func GetDeployByRef(w http.ResponseWriter, r *http.Request) {

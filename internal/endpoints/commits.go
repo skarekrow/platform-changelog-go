@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
@@ -19,16 +21,18 @@ func GetCommitsAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, commits := db.GetCommitsAll(db.DB, q.Page, q.Limit)
+	result, commits, count := db.GetCommitsAll(db.DB, q.Page, q.Limit)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
+	commitsList := structs.TimelinesList{count, commits}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(commits)
+	json.NewEncoder(w).Encode(commitsList)
 }
 
 func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
@@ -49,16 +53,18 @@ func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, commits := db.GetCommitsByService(db.DB, service, q.Page, q.Limit)
+	result, commits, count := db.GetCommitsByService(db.DB, service, q.Page, q.Limit)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
+	commitsList := structs.TimelinesList{count, commits}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(commits)
+	json.NewEncoder(w).Encode(commitsList)
 }
 
 func GetCommitByRef(w http.ResponseWriter, r *http.Request) {
