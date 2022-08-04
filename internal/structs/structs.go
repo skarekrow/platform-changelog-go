@@ -5,18 +5,18 @@ type Query struct {
 	Limit  int
 }
 type ServicesList struct {
-	Count    int64          `json:"count"`
-	Services []ServicesData `json:"services"`
+	Count int64          `json:"count"`
+	Data  []ServicesData `json:"data"`
 }
 
 type ExpandedServicesList struct {
-	Count    int64                  `json:"count"`
-	Services []ExpandedServicesData `json:"services"`
+	Count int64                  `json:"count"`
+	Data  []ExpandedServicesData `json:"data"`
 }
 
 type TimelinesList struct {
-	Count     int64           `json:"count"`
-	Timelines []TimelinesData `json:"timelines"`
+	Count int64           `json:"count"`
+	Data  []TimelinesData `json:"data"`
 }
 
 type ServicesData struct {
