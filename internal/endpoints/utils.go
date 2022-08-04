@@ -15,17 +15,17 @@ func writeResponse(w http.ResponseWriter, status int, message string) {
 
 func initQuery(r *http.Request) (structs.Query, error) {
 	q := structs.Query{
-		Page:  0,
-		Limit: 10,
+		Offset: 0,
+		Limit:  10,
 	}
 
 	var err error
 
-	page := r.URL.Query().Get("page")
+	offset := r.URL.Query().Get("offset")
 	limit := r.URL.Query().Get("limit")
 
-	if page != "" {
-		q.Page, err = strconv.Atoi(page)
+	if offset != "" {
+		q.Offset, err = strconv.Atoi(offset)
 	}
 
 	if limit != "" {

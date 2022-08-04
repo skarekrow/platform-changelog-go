@@ -21,7 +21,7 @@ func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, servicesWithTimelines, count := db.GetServicesAll(db.DB, q.Page, q.Limit)
+	result, servicesWithTimelines, count := db.GetServicesAll(db.DB, q.Offset, q.Limit)
 	if result.Error != nil {
 
 		w.WriteHeader(http.StatusInternalServerError)

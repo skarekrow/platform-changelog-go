@@ -1,8 +1,8 @@
 package structs
 
 type Query struct {
-	Page  int
-	Limit int
+	Offset int
+	Limit  int
 }
 type ServicesList struct {
 	Count    int64          `json:"count"`

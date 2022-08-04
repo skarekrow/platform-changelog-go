@@ -20,7 +20,7 @@ func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, timeline, count := db.GetTimelinesAll(db.DB, q.Page, q.Limit)
+	result, timeline, count := db.GetTimelinesAll(db.DB, q.Offset, q.Limit)
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -56,7 +56,7 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, timeline, count := db.GetTimelinesByService(db.DB, service, q.Page, q.Limit)
+	result, timeline, count := db.GetTimelinesByService(db.DB, service, q.Offset, q.Limit)
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
