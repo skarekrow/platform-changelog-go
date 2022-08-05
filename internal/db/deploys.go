@@ -8,40 +8,40 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetDeploysAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []structs.TimelinesData, int64) {
+func GetDeploysAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []models.Timelines, int64) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysAll)
 	defer callDurationTimer.ObserveDuration()
 
 	var count int64
-	var deploys []structs.TimelinesData
+	var deploys []models.Timelines
 
 	db = db.Model(models.Timelines{}).Where("timelines.type = ?", "deploy")
 
 	db.Find(&deploys).Count(&count)
-	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Scan(&deploys)
+	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)
 
 	return result, deploys, count
 }
 
-func GetDeploysByService(db *gorm.DB, service structs.ServicesData, offset int, limit int) (*gorm.DB, []structs.TimelinesData, int64) {
+func GetDeploysByService(db *gorm.DB, service structs.ServicesData, offset int, limit int) (*gorm.DB, []models.Timelines, int64) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysByService)
 	defer callDurationTimer.ObserveDuration()
 
 	var count int64
-	var deploys []structs.TimelinesData
+	var deploys []models.Timelines
 
 	db = db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "deploy")
 
 	db.Find(&deploys).Count(&count)
-	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Scan(&deploys)
+	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)
 
 	return result, deploys, count
 }
 
-func GetDeployByRef(db *gorm.DB, ref string) (*gorm.DB, structs.TimelinesData) {
+func GetDeployByRef(db *gorm.DB, ref string) (*gorm.DB, models.Timelines) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeployByRef)
 	defer callDurationTimer.ObserveDuration()
-	var deploy structs.TimelinesData
+	var deploy models.Timelines
 	result := db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "deploy").Scan(&deploy)
 	return result, deploy
 }
