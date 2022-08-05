@@ -7,12 +7,20 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
 func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	result, timeline := db.GetTimelinesAll(db.DB)
+	q, err := initQuery(r)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, "Invalid query")
+		return
+	}
+
+	result, timeline, count := db.GetTimelinesAll(db.DB, q.Offset, q.Limit)
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -21,15 +29,24 @@ func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	timelinesList := structs.TimelinesList{count, timeline}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(timeline)
+	json.NewEncoder(w).Encode(timelinesList)
 }
 
 func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	serviceName := chi.URLParam(r, "service")
+
+	q, err := initQuery(r)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, "Invalid query")
+		return
+	}
 
 	result, service := db.GetServiceByName(db.DB, serviceName)
 
@@ -39,7 +56,7 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, timeline := db.GetTimelinesByService(db.DB, service)
+	result, timeline, count := db.GetTimelinesByService(db.DB, service, q.Offset, q.Limit)
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -48,9 +65,11 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	timelinesList := structs.TimelinesList{count, timeline}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(timeline)
+	json.NewEncoder(w).Encode(timelinesList)
 }
 
 func GetTimelineByRef(w http.ResponseWriter, r *http.Request) {

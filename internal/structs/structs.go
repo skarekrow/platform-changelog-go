@@ -1,5 +1,24 @@
 package structs
 
+type Query struct {
+	Offset int
+	Limit  int
+}
+type ServicesList struct {
+	Count int64          `json:"count"`
+	Data  []ServicesData `json:"data"`
+}
+
+type ExpandedServicesList struct {
+	Count int64                  `json:"count"`
+	Data  []ExpandedServicesData `json:"data"`
+}
+
+type TimelinesList struct {
+	Count int64           `json:"count"`
+	Data  []TimelinesData `json:"data"`
+}
+
 type ServicesData struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`

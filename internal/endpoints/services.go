@@ -8,23 +8,33 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
 func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	result, servicesWithTimelines := db.GetServicesAll(db.DB)
+	q, err := initQuery(r)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, "Invalid query")
+		return
+	}
+
+	result, servicesWithTimelines, count := db.GetServicesAll(db.DB, q.Offset, q.Limit)
 	if result.Error != nil {
 
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
+
+	servicesList := structs.ExpandedServicesList{count, servicesWithTimelines}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 
-	json.NewEncoder(w).Encode(servicesWithTimelines)
-
+	json.NewEncoder(w).Encode(servicesList)
 }
 
 func GetServiceByName(w http.ResponseWriter, r *http.Request) {

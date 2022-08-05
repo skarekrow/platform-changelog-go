@@ -7,26 +7,43 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
 func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	result, deploys := db.GetDeploysAll(db.DB)
+	q, err := initQuery(r)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, "Invalid query")
+		return
+	}
+
+	result, deploys, count := db.GetDeploysAll(db.DB, q.Offset, q.Limit)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
+	deploysList := structs.TimelinesList{count, deploys}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(deploys)
+	json.NewEncoder(w).Encode(deploysList)
 }
 
 func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	serviceName := chi.URLParam(r, "service")
+
+	q, err := initQuery(r)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, "Invalid query")
+		return
+	}
 
 	result, service := db.GetServiceByName(db.DB, serviceName)
 	if result.Error != nil {
@@ -35,16 +52,18 @@ func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, deploys := db.GetDeploysByService(db.DB, service)
+	result, deploys, count := db.GetDeploysByService(db.DB, service, q.Offset, q.Limit)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
+	deploysList := structs.TimelinesList{count, deploys}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(deploys)
+	json.NewEncoder(w).Encode(deploysList)
 }
 
 func GetDeployByRef(w http.ResponseWriter, r *http.Request) {

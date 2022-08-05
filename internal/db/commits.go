@@ -19,12 +19,34 @@ func CreateCommitEntry(db *gorm.DB, t []models.Timelines) *gorm.DB {
 	return db
 }
 
-func GetCommitsAll(db *gorm.DB) (*gorm.DB, []structs.TimelinesData) {
+func GetCommitsAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []structs.TimelinesData, int64) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsAll)
 	defer callDurationTimer.ObserveDuration()
+
+	var count int64
 	var commits []structs.TimelinesData
-	result := db.Model(models.Timelines{}).Order("Timestamp desc").Where("timelines.type = ?", "commit").Order("Timestamp desc").Scan(&commits)
-	return result, commits
+
+	db = db.Model(models.Timelines{}).Where("timelines.type = ?", "commit")
+
+	db.Find(&commits).Count(&count)
+	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Scan(&commits)
+
+	return result, commits, count
+}
+
+func GetCommitsByService(db *gorm.DB, service structs.ServicesData, offset int, limit int) (*gorm.DB, []structs.TimelinesData, int64) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
+	defer callDurationTimer.ObserveDuration()
+
+	var count int64
+	var commits []structs.TimelinesData
+
+	db = db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit")
+
+	db.Find(&commits).Count(&count)
+	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Scan(&commits)
+
+	return result, commits, count
 }
 
 func GetCommitByRef(db *gorm.DB, ref string) (*gorm.DB, structs.TimelinesData) {
@@ -33,12 +55,4 @@ func GetCommitByRef(db *gorm.DB, ref string) (*gorm.DB, structs.TimelinesData) {
 	var commit structs.TimelinesData
 	result := db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "commit").Scan(&commit)
 	return result, commit
-}
-
-func GetCommitsByService(db *gorm.DB, service structs.ServicesData) (*gorm.DB, []structs.TimelinesData) {
-	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
-	defer callDurationTimer.ObserveDuration()
-	var commits []structs.TimelinesData
-	result := db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit").Order("Timestamp desc").Scan(&commits)
-	return result, commits
 }
