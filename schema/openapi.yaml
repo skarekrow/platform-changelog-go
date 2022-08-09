@@ -10,7 +10,7 @@ paths:
     get:
       summary: Returns list of registered services
       description: Returns a list of services that have been registered with the changelog
-      operationId: api.services
+      operationId: get.services
       responses:
         '200':
           description: OK
@@ -20,12 +20,12 @@ paths:
                 $ref: '#/components/schemas/ServicesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-  
+
   /timelines:
     get:
       summary: Returns an array of timelines
       description: Returns a list of all timelines
-      operationId: api.timelines
+      operationId: get.timelines
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
@@ -43,7 +43,7 @@ paths:
     get:
       summary: Returns an array of commits
       description: Returns a list of all commits
-      operationId: api.commits
+      operationId: get.commits
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
@@ -61,7 +61,7 @@ paths:
     get:
       summary: Returns an array of deploys
       description: Returns a list of all deploys
-      operationId: api.deploys
+      operationId: get.deploys
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
@@ -74,12 +74,12 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-  
+
   /services/{service}:
     get:
       summary: Returns an individual service
       description: returns an individual service
-      operationId: api.services.service
+      operationId: get.services.service
       parameters:
         - $ref: '#/components/parameters/service'
       responses:
@@ -96,7 +96,7 @@ paths:
     get:
       summary: Returns all the commits and deploys for a specific service
       description: Returns an array containing timelines for a specific service
-      operationId: api.timelines.service
+      operationId: get.services.service.timelines
       parameters:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
@@ -107,15 +107,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServicesData'
+                $ref: '#/components/schemas/Timeline'
         '400':
           $ref: '#/components/responses/BadRequest'
-          
+
   /services/{service}/commits:
     get:
       summary: Returns all the commits for a specific service
       description: Returns an array containing commits for a specific service
-      operationId: api.commits.service
+      operationId: get.services.service.commits
       parameters:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
@@ -126,16 +126,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TimelinesData'
+                $ref: '#/components/schemas/Timeline'
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  
+
   /services/{service}/deploys:
     get:
       summary: Returns all the deploys for a specific service
       description: Returns an array containing deploys for a specific service
-      operationId: api.deploys.service
+      operationId: get.services.service.deploys
       parameters:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
@@ -146,7 +146,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TimelinesData'
+                $ref: '#/components/schemas/Timeline'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -154,7 +154,7 @@ paths:
     get:
       summary: Get data on a particular commit or deploy
       description: Get data on a particular timelines
-      operationId: api.timelines.ref
+      operationId: get.timelines.ref
       parameters:
         - $ref: '#/components/parameters/ref'
       responses:
@@ -163,7 +163,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TimelinesData'
+                $ref: '#/components/schemas/Data'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -171,7 +171,7 @@ paths:
     get:
       summary: Get data on a particular commit
       description: Get data on a particular commit
-      operationId: api.commits.ref
+      operationId: get.commits.ref
       parameters:
         - $ref: '#/components/parameters/ref'
       responses:
@@ -180,7 +180,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Timeline'
+                $ref: '#/components/schemas/Data'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -188,7 +188,7 @@ paths:
     get:
       summary: Get data on a particular deploy
       description: Get data on a particular deploy
-      operationId: api.deploys.ref
+      operationId: get.deploys.ref
       parameters:
         - $ref: '#/components/parameters/ref'
       responses:
@@ -197,25 +197,116 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Timeline'
+                $ref: '#/components/schemas/Data'
         '400':
           $ref: '#/components/responses/BadRequest'
+
+  /github-webhook:
+    post:
+      description: Create a new commit from Github
+      operationId: post.githubWebhook
+      requestBody:
+        description: JSON Data from Pull Request Webhook
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GithubWebhook'
+      responses:
+        '200':
+          description: OK message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        default:
+          description: An Error has occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /gitlab-webhook:
+    post:
+      description: Create a new commit from Gitlab
+      operationId: post.gitlabWebhook
+      requestBody:
+        description: JSON Data from Pull Request Webhook
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitlabWebhook'
+      responses:
+        '200':
+          description: OK message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        default:
+          description: An Error has occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
 
 components:
   schemas:
     ServicesData:
-      type: array
-      items:
-        $ref: '#/components/schemas/Service'
+      type: object
+      properties:
+        count:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
 
     TimelinesData:
       type: array
       items:
         $ref: '#/components/schemas/Timeline'
 
+    Data:
+      type: object
+      properties:
+        id:
+          type: integer
+        service_id:
+          type: integer
+        timestamp:
+          type: string
+        type:
+          type: string
+        repo:
+          type: string
+        ref: 
+          type: string
+        author:
+          type: string
+        merged_by:
+          type: string
+        message:
+          type: string
+        namespace:
+          type: string
+          description: Namespace the app deployed into
+        cluster:
+          type: string
+          description: The cluster the app deployed into
+        image:
+          type: string
+          description: The image tag that was deployed
+        url:
+          type: string
+          description: Link to the merged PR
+
     Service:
       type: object
       properties:
+        id:
+          type: integer
         name:
           type: string
           description: Name of the service
@@ -237,47 +328,23 @@ components:
         branch:
           type: string
           description: monitored branch
+        latest_commit:
+          $ref: '#/components/schemas/Data'
+          optional: true
+        latest_deploy:
+          $ref: '#/components/schemas/Data'
+          optional: true
 
     Timeline:
       type: object
       properties:
-        service:
-          type: string
-          description: Name of the service
-        repo:
-          type: string
-          description: Github repo url
-        ref:
-          type: string
-          description: Reference to the Git commit or deploy
-        timestamp:
-          type: string
-          description: Timestamp of the commit or deploy
-        type:
-          type: string
-          description: Type of event (commit or deploy)
-        author:
-          type: string
-          description: Author of the commit
-        merged_by:
-          type: string
-          description: User that merged the pull request
-        message:
-          type: string
-          description: Git commit message
-        namespace:
-          type: string
-          description: Namespace the app deployed into
-        clusteer:
-          type: string
-          description: The cluster the app deployed into
-        image:
-          type: string
-          description: The image tag that was deployed
-        url:
-          type: string
-          description: Link to the merged PR
-  
+        count:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Data'
+
     Error:
       type: object
       properties:
@@ -287,6 +354,582 @@ components:
       required:
       - message
 
+    Message:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Message text
+      required:
+      - msg
+
+    GithubWebhook:
+      type: object
+      properties:
+        ref:
+          type: string
+        before:
+          type: string
+        after:
+          type: string
+        repository:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int32
+            node_id:
+              type: string
+            name:
+              type: string
+            full_name:
+              type: string
+            private:
+              type: boolean
+            owner:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: nullable
+                login:
+                  type: string
+                id:
+                  type: integer
+                  format: int32
+                node_id:
+                  type: string
+                avatar_url:
+                  type: string
+                gravatar_id:
+                  type: string
+                url:
+                  type: string
+                html_url:
+                  type: string
+                followers_url:
+                  type: string
+                following_url:
+                  type: string
+                gists_url:
+                  type: string
+                starred_url:
+                  type: string
+                subscriptions_url:
+                  type: string
+                organizations_url:
+                  type: string
+                repos_url:
+                  type: string
+                events_url:
+                  type: string
+                received_events_url:
+                  type: string
+                type:
+                  type: string
+                site_admin:
+                  type: boolean
+            html_url:
+              type: string
+            description:
+              type: string
+              format: nullable
+            fork:
+              type: boolean
+            url:
+              type: string
+            forks_url:
+              type: string
+            keys_url:
+              type: string
+            collaborators_url:
+              type: string
+            teams_url:
+              type: string
+            hooks_url:
+              type: string
+            issue_events_url:
+              type: string
+            events_url:
+              type: string
+            assignees_url:
+              type: string
+            branches_url:
+              type: string
+            tags_url:
+              type: string
+            blobs_url:
+              type: string
+            git_tags_url:
+              type: string
+            git_refs_url:
+              type: string
+            trees_url:
+              type: string
+            statuses_url:
+              type: string
+            languages_url:
+              type: string
+            stargazers_url:
+              type: string
+            contributors_url:
+              type: string
+            subscribers_url:
+              type: string
+            subscription_url:
+              type: string
+            commits_url:
+              type: string
+            git_commits_url:
+              type: string
+            comments_url:
+              type: string
+            issue_comment_url:
+              type: string
+            contents_url:
+              type: string
+            compare_url:
+              type: string
+            merges_url:
+              type: string
+            archive_url:
+              type: string
+            downloads_url:
+              type: string
+            issues_url:
+              type: string
+            pulls_url:
+              type: string
+            milestones_url:
+              type: string
+            notifications_url:
+              type: string
+            labels_url:
+              type: string
+            releases_url:
+              type: string
+            deployments_url:
+              type: string
+            created_at:
+              type: integer
+              format: int32
+            updated_at:
+              type: string
+              format: date-time
+            pushed_at:
+              type: integer
+              format: int32
+            git_url:
+              type: string
+            ssh_url:
+              type: string
+            clone_url:
+              type: string
+            svn_url:
+              type: string
+            homepage:
+              type: string
+            size:
+              type: integer
+              format: int32
+            stargazers_count:
+              type: integer
+              format: int32
+            watchers_count:
+              type: integer
+              format: int32
+            language:
+              type: string
+            has_issues:
+              type: boolean
+            has_projects:
+              type: boolean
+            has_downloads:
+              type: boolean
+            has_wiki:
+              type: boolean
+            has_pages:
+              type: boolean
+            forks_count:
+              type: integer
+              format: int32
+            mirror_url:
+              type: string
+              format: nullable
+            archived:
+              type: boolean
+            disabled:
+              type: boolean
+            open_issues_count:
+              type: integer
+              format: int32
+            license:
+              type: string
+              format: nullable
+            allow_forking:
+              type: boolean
+            is_template:
+              type: boolean
+            topics:
+              type: array
+              items:
+                type: string
+            visibility:
+              type: string
+            forks:
+              type: integer
+              format: int32
+            open_issues:
+              type: integer
+              format: int32
+            watchers:
+              type: integer
+              format: int32
+            default_branch:
+              type: string
+            stargazers:
+              type: integer
+              format: int32
+            master_branch:
+              type: string
+            organization:
+              type: string
+        pusher:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+        organization:
+          type: object
+          properties:
+            login:
+              type: string
+            id:
+              type: integer
+              format: int32
+            node_id:
+              type: string
+            url:
+              type: string
+            repos_url:
+              type: string
+            events_url:
+              type: string
+            hooks_url:
+              type: string
+            issues_url:
+              type: string
+            members_url:
+              type: string
+            public_members_url:
+              type: string
+            avatar_url:
+              type: string
+            description:
+              type: string
+        enterprise:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int32
+            slug:
+              type: string
+            name:
+              type: string
+            node_id:
+              type: string
+            avatar_url:
+              type: string
+            description:
+              type: string
+            website_url:
+              type: string
+            html_url:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+        sender:
+          type: object
+          properties:
+            login:
+              type: string
+            id:
+              type: integer
+              format: int32
+            node_id:
+              type: string
+            avatar_url:
+              type: string
+            gravatar_id:
+              type: string
+            url:
+              type: string
+            html_url:
+              type: string
+            followers_url:
+              type: string
+            following_url:
+              type: string
+            gists_url:
+              type: string
+            starred_url:
+              type: string
+            subscriptions_url:
+              type: string
+            organizations_url:
+              type: string
+            repos_url:
+              type: string
+            events_url:
+              type: string
+            received_events_url:
+              type: string
+            type:
+              type: string
+            site_admin:
+              type: boolean
+        created:
+          type: boolean
+        deleted:
+          type: boolean
+        forced:
+          type: boolean
+        base_ref:
+          type: string
+          format: nullable
+        compare:
+          type: string
+        commits:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              tree_id:
+                type: string
+              distinct:
+                type: boolean
+              message:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              url:
+                type: string
+              author:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  username:
+                    type: string
+              committer:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  username:
+                    type: string
+              added:
+                type: array
+                items:
+                  type: string
+              removed:
+                type: array
+                items:
+                  type: string
+              modified:
+                type: array
+                items:
+                  type: string
+        head_commit:
+          type: object
+          properties:
+            id:
+              type: string
+            tree_id:
+              type: string
+            distinct:
+              type: boolean
+            message:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+            url:
+              type: string
+            author:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                username:
+                  type: string
+            committer:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                username:
+                  type: string
+            added:
+              type: array
+              items:
+                type: string
+            removed:
+              type: array
+              items:
+                type: string
+            modified:
+              type: array
+              items:
+                type: string
+
+    GitlabWebhook:
+      type: object
+      properties:
+        object_kind:
+          type: string
+        event_name:
+          type: string
+        before:
+          type: string
+        after:
+          type: string
+        ref:
+          type: string
+        checkout_sha:
+          type: string
+        message:
+          type: string
+          format: nullable
+        user_id:
+          type: integer
+          format: int32
+        user_name:
+          type: string
+        user_username:
+          type: string
+        user_email:
+          type: string
+        user_avatar:
+          type: string
+        project_id:
+          type: integer
+          format: int32
+        project:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int32
+            name:
+              type: string
+            description:
+              type: string
+            web_url:
+              type: string
+            avatar_url:
+              type: string
+              format: nullable
+            git_ssh_url:
+              type: string
+            git_http_url:
+              type: string
+            namespace:
+              type: string
+            visibility_level:
+              type: integer
+              format: int32
+            path_with_namespace:
+              type: string
+            default_branch:
+              type: string
+            ci_config_path:
+              type: string
+            homepage:
+              type: string
+            url:
+              type: string
+            ssh_url:
+              type: string
+            http_url:
+              type: string
+        commits:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              message:
+                type: string
+              title:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              url:
+                type: string
+              author:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  email:
+                    type: string
+              added:
+                type: array
+                items:
+                  type: string
+              modified:
+                type: array
+                items:
+                  type: string
+              removed:
+                type: array
+                items:
+                  type: string
+        total_commits_count:
+          type: integer
+          format: int32
+        repository:
+          type: object
+          properties:
+            name:
+              type: string
+            url:
+              type: string
+            description:
+              type: string
+            homepage:
+              type: string
+            git_http_url:
+              type: string
+            git_ssh_url:
+              type: string
+            visibility_level:
+              type: integer
+              format: int32
+
   parameters:
     service:
       in: path
@@ -295,7 +938,7 @@ components:
       schema:
         type: string
       description: The service name
-    
+
     ref:
       in: path
       name: ref
@@ -303,7 +946,7 @@ components:
       schema:
         type: string
       description: The commit reference
-      
+
     offsetParam:
       in: query
       name: offset
@@ -313,7 +956,7 @@ components:
         minimum: 0
         default: 0
       description: The number of items to skip before starting to collect the result set.
-      
+
     limitParam:
       in: query
       name: limit
