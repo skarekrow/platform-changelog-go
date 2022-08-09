@@ -145,7 +145,6 @@ func GitlabWebhook(w http.ResponseWriter, r *http.Request) {
 					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert webhook data"}`)
 					return
 				}
-				db.DB.Commit()
 				l.Log.Infof("Created %d commit entries for %s", len(commitData), key)
 				writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
 				return
